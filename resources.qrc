@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>images/CometButton.png</file>
+        <file>images/ExitButton.png</file>
+        <file>images/ExitButton2.png</file>
+        <file>images/MaximiseGrey.png</file>
+        <file>images/MaximiseWhite.png</file>
+        <file>images/MinimiseGrey.png</file>
+        <file>images/MinimiseWhite.png</file>
+        <file>images/pausesmall.png</file>
+        <file>images/stopsmall.png</file>
+    </qresource>
+    <qresource prefix="/files">
+        <file>Main.css</file>
+    </qresource>
+</RCC>
