@@ -2,6 +2,7 @@
  * This is the main class for the application
  * It contains all other widgets and manages them
  */
+
 #include "MainWindow.h"
 
 MainWindow::MainWindow(QFrame *parent)
