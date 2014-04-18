@@ -44,10 +44,9 @@ private:
     QHBoxLayout* bottomLeftLayout;
     QHBoxLayout* bottomRightLayout;
 
-    bool max;
-    int animTime;
-
-
+    bool max; // For Window Maximising with frameless helper
+    int animTime; // For setting animation times on slides
+    bool switched;
 
     // SFTP Session
     std::string host;
@@ -58,16 +57,15 @@ private:
     void connectSftp();
 
 protected:
-    // Keyboard Mouse Handling
-    //void mouseMoveEvent(QMouseEvent* mouseEvent);
-    //void keyPressEvent(QKeyEvent* event);
-    //void keyReleaseEvent(QKeyEvent* event);
     void createGuiComponents();
     void createMainLayout();
+
 private slots:
+    void maxSize();
 
 public slots:
     //void connectClicked();
+    void switchSlides();
 
 };
 

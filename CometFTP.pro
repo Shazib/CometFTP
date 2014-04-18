@@ -19,7 +19,9 @@ SOURCES += main.cpp\
     LocalExplorer.cpp \
     StatusArea.cpp \
     ServerExplorer.cpp \
-    SFTPSite.cpp
+    SFTPSite.cpp \
+    ServerFileModel.cpp \
+    ServerBrowser.cpp
 
 HEADERS  += \
     MainWindow.h \
@@ -28,7 +30,9 @@ HEADERS  += \
     LocalExplorer.h \
     StatusArea.h \
     ServerExplorer.h \
-    SFTPSite.h
+    SFTPSite.h \
+    ServerFileModel.h \
+    ServerBrowser.h
 
 RESOURCES += \
     resources.qrc

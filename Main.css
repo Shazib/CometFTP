@@ -66,14 +66,15 @@ StatusArea QLabel, StatusArea QPushButton{
     background-image:url(:/images/stopsmall.png);
     background-position: bottom left; 
     background-repeat:no-repeat;
+    padding:1px;
 }
 
-/*StatusArea QPushButton:hover{
+#Status_PauseButton{
 	background-color:#FFFFFF; 
         background-image:url(:/images/pausesmall.png)
 
 }
-*/
+
 #Status_PauseButton{
 	border-style:none;
 	background-color:#ebebeb;
@@ -112,8 +113,9 @@ StatusArea QLabel, StatusArea QPushButton{
 
 
 #Server_Widget{
-    background-color:#cdcdcd;
+    background-color:#ebebeb;
 }
+
 ServerExplorer{
     background-color:#ebebeb;
 }

@@ -9,10 +9,9 @@
 MainWindow::MainWindow(QFrame *parent)
     : QFrame(parent)
 {
-
-    qDebug() << "Creating Main Window";
     // Initial Setup
     max = false;
+    switched = false;
     this->resize(900,500);
     move(QApplication::desktop()->availableGeometry(this).center() - rect().center());
     int _min=500;
@@ -20,18 +19,20 @@ MainWindow::MainWindow(QFrame *parent)
     animTime=(_min+_max)>>1;
 
     // Load GUI
-    qDebug() << "About to load gui";
-
     createGuiComponents();
-    qDebug() << "GUI Components Created";
-    qDebug() << "About to create main Layout";
     createMainLayout();
-    qDebug() << "Finished with layout";
+
+    // Load Slots
+    QObject::connect(btnQuit, SIGNAL(clicked()), this, SLOT(close()));
+    QObject::connect(btnMax, SIGNAL(clicked()), this, SLOT(maxSize()));
+    QObject::connect(btnMin, SIGNAL(clicked()), this, SLOT(showMinimized()));
+
 
 
 }
 // Setup main GUI components
-void MainWindow::createGuiComponents(){
+void MainWindow::createGuiComponents()
+{
 
     // Taskbar Buttons
     btnQuit = new QPushButton("",this);
@@ -55,9 +56,9 @@ void MainWindow::createGuiComponents(){
 }
 
 // Create the main layout
-void MainWindow::createMainLayout(){
+void MainWindow::createMainLayout()
+{
 
-    qDebug() << "Main Layout Started";
     // Setup Layouts
     mainLayout = new QVBoxLayout();
     topLayout = new QHBoxLayout();
@@ -85,7 +86,7 @@ void MainWindow::createMainLayout(){
     topLayout->setContentsMargins(QMargins(-1,-1,-1,0));
 
     // Setup Status Area
-    statusArea = new StatusArea();
+    statusArea = new StatusArea(this);
     topMiddleLayout->addWidget(statusArea);
     topMiddleLayout->setContentsMargins(4,4,4,0);
 
@@ -94,7 +95,6 @@ void MainWindow::createMainLayout(){
     topLayout->addLayout(topRightLayout);
     topLayout->setMargin(0);
 
-    qDebug() << "All top layout done";
 
 // Create Bottom Layout
     // Layouts
@@ -102,16 +102,12 @@ void MainWindow::createMainLayout(){
     bottomRightLayout = new QHBoxLayout();
     bottomLayout = new QHBoxLayout();
 
-    qDebug() << "Layouts done";
     // Setup Required Widgets
     localExplorer = new LocalExplorer();
-    qDebug() << "Local explorer done";
     serverExplorer = new ServerExplorer();
 
-    qDebug() << "widgets Created";
     bottomLeftLayout->addWidget(localExplorer);
     bottomRightLayout->addWidget(serverExplorer);
-    qDebug() << "Widgets Done";
     // Proxy Widgets for Slider
     qDebug() << "Proxy widgets done";
     QWidget* localExplorerWidget = new QWidget();
@@ -129,22 +125,55 @@ void MainWindow::createMainLayout(){
     // Empty Frame to Test
     QWidget* temp = new QWidget();
 
-
-    qDebug() << "All Bottom Widgets Done";
-
     // Create Bottom Stacked Slider Widget
     mainContent = new SlidingStackedWidget(this);
     mainContent->addWidget(explorerSlider);
     mainContent->addWidget(temp);
     mainContent->setSpeed(animTime);
-    qDebug() <<"Slider setup complete";
+    mainContent->setVerticalMode(true);
+    mainContent->setAnimation(QEasingCurve::OutQuart);
     mainLayout->setContentsMargins(0,0,0,0);
     mainLayout->addLayout(topLayout,0);
     mainLayout->addWidget(mainContent,0,0);
     this->setLayout(mainLayout);
 }
 
+void MainWindow::maxSize()
+{
 
+    if(!max) {
+
+        int a = QApplication::desktop()->screenNumber(this);
+        resize(QApplication::desktop()->availableGeometry(a).size());
+        move(QApplication::desktop()->availableGeometry(a).topLeft());
+        max = true;
+
+    } else if (max){
+        resize(900,500);
+        move(QApplication::desktop()->availableGeometry(this).center() - rect().center());
+        max = false;
+    }
+
+}
+
+// Slots for status area
+void MainWindow::switchSlides()
+{
+
+    if( switched == false){
+        qDebug() << "explorer is up";
+       mainContent->slideInIdx(1,SlidingStackedWidget::BOTTOM2TOP);
+       qDebug() << "switched to next";
+       switched = true;
+    } else if (switched == true) {
+        qDebug() << "downloads is up";
+        mainContent->slideInIdx(0,SlidingStackedWidget::BOTTOM2TOP);
+        qDebug() << "switched to previous";
+        switched = false;
+    }
+
+
+}
 
 MainWindow::~MainWindow()
 {

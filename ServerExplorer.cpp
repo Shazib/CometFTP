@@ -67,14 +67,14 @@ void ServerExplorer::setupSiteManager()
     bookmarkBtn = new QPushButton("  Bookmarks ", this);
     bookmarkBtn->setStyle(QStyleFactory::create("Fusion"));
     bookmarkBtn->setIcon(bookmarkIcon);
-    bookmarkBtn->setStyleSheet("QPushButton{border-style:none; text-align:center;padding-top:2px; padding-bottom:4px; } ");
+    bookmarkBtn->setStyleSheet("QPushButton{border-style:none; text-align:center;padding-top:2px; padding-bottom:4px; background-color:#cdcdcd; } ");
 
     // SFTP Button
     QIcon sftpIcon =  QIcon(":/images/Screen.svg");
     sftpBtn = new QPushButton("  SFTP ", this);
     sftpBtn->setStyle(QStyleFactory::create("Fusion"));
     sftpBtn->setIcon(sftpIcon);
-    sftpBtn->setStyleSheet("QPushButton{border-style:none; text-align:center; padding-top:2px; background-color:#ebebeb; padding-bottom:4px; }" );
+    sftpBtn->setStyleSheet("QPushButton{border-style:none; text-align:center; padding-top:2px; padding-bottom:4px; }" );
 
     toolbarLayout->addWidget(bookmarkBtn);
     toolbarLayout->addWidget(sftpBtn);
@@ -147,6 +147,7 @@ void ServerExplorer::setupSiteManager()
     siteManager = new QWidget();
     siteManager->setObjectName("Server_Widget");
     QVBoxLayout* mainLayout = new QVBoxLayout();
+
     siteManager->setLayout(mainLayout);
     mainLayout->addWidget(toolbar);
     mainLayout->addWidget(managerSlider);
@@ -167,7 +168,7 @@ void ServerExplorer::bookmarkBtnPressed()
 {
     // Set Styling
     bookmarkBtn->setStyleSheet("QPushButton{border-style:none; text-align:center;padding-top:2px; padding-bottom:4px; background-color:#ebebeb;}");
-    sftpBtn->setStyleSheet("QPushButton{border-style:none; text-align:center; padding-top:2px;padding-bottom:4px; background-color:none;}");
+    sftpBtn->setStyleSheet("QPushButton{border-style:none; text-align:center; padding-top:2px;padding-bottom:4px; background-color:#cdcdcd;}");
 
     // Switch to bookmark slide
 }
@@ -175,7 +176,7 @@ void ServerExplorer::bookmarkBtnPressed()
 void ServerExplorer::sftpBtnPressed()
 {
     // Setup Style
-    bookmarkBtn->setStyleSheet("QPushButton{border-style:none; text-align:center;padding-top:2px;padding-bottom:4px; background-color:none;}");
+    bookmarkBtn->setStyleSheet("QPushButton{border-style:none; text-align:center;padding-top:2px;padding-bottom:4px; background-color:#cdcdcd;}");
     sftpBtn->setStyleSheet("QPushButton{border-style:none; text-align:center; padding-top:2px;padding-bottom:4px; background-color:#ebebeb;}");
 
     // Switch to sftp slide

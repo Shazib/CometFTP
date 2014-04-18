@@ -68,10 +68,14 @@ StatusArea::StatusArea(QWidget *parent) :
 
     this->setLayout(main);
 
+    // Slots
+    QObject::connect(numFiles, SIGNAL(clicked()),this->parent(), SLOT(switchSlides()));
+
 }
 
 // Enable StyleSheets
-void StatusArea::paintEvent(QPaintEvent* event){
+void StatusArea::paintEvent(QPaintEvent* event)
+{
     QStyleOption o;
     o.initFrom(this);
     QPainter p(this);
