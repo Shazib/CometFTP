@@ -4,6 +4,7 @@
 #include <QMessageBox>
 
 #include <libssh/sftp.h>
+
 SFTPSite::SFTPSite(QWidget *parent, std::string host, std::string user, std::string pass, std::string port) :
     QWidget(parent)
 {

@@ -10,13 +10,17 @@
 #include <libssh/sftp.h>
 
 // Classes
+#include "ServerExplorer.h"
+#include "LocalExplorer.h"
+#include "StatusArea.h"
+#include "SlidingStackedWidget.h"
 
 class MainWindow : public QFrame
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QFrame *parent = 0);
     ~MainWindow();
 
 private:
@@ -26,9 +30,11 @@ private:
     QPushButton* btnMax;
     QPushButton* btnMin;
     QPushButton* btnMenu;
-
+    StatusArea* statusArea;
+    LocalExplorer* localExplorer;
+    ServerExplorer* serverExplorer;
+    SlidingStackedWidget* mainContent;
     // Layouts
-
     QVBoxLayout* mainLayout;
     QHBoxLayout* topLayout;
     QHBoxLayout* topLeftLayout;
@@ -39,9 +45,9 @@ private:
     QHBoxLayout* bottomRightLayout;
 
     bool max;
-    AddressBar* bar;
-    void createGuiComponents();
-    void createMainLayout();
+    int animTime;
+
+
 
     // SFTP Session
     std::string host;
@@ -53,14 +59,15 @@ private:
 
 protected:
     // Keyboard Mouse Handling
-    void mouseMoveEvent(QMouseEvent* mouseEvent);
-    void keyPressEvent(QKeyEvent* event);
-    void keyReleaseEvent(QKeyEvent* event);
-
+    //void mouseMoveEvent(QMouseEvent* mouseEvent);
+    //void keyPressEvent(QKeyEvent* event);
+    //void keyReleaseEvent(QKeyEvent* event);
+    void createGuiComponents();
+    void createMainLayout();
 private slots:
 
 public slots:
-    void connectClicked();
+    //void connectClicked();
 
 };
 

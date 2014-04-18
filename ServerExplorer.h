@@ -22,6 +22,7 @@ private slots:
     void connectBtnPressed();
 
 private:
+    QFrame* toolbar;
     QWidget* explorer;
     QWidget* siteManager;
     QWidget* bookmarkSlide;
@@ -30,13 +31,15 @@ private:
     QPushButton* bookmarkBtn;
     QPushButton* sftpBtn;
     QPushButton* connectBtn;
-    QPuchButton* connectBookmarkBtn;
+    QPushButton* connectBookmarkBtn;
+
     //Connect Area
     QLineEdit* host;
     QLineEdit* user;
     QLineEdit* password;
     QLineEdit* port;
 
+    int animTime;
 
 };
 

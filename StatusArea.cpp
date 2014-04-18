@@ -14,7 +14,7 @@ StatusArea::StatusArea(QWidget *parent) :
     QPushButton* numFiles = new QPushButton("255");
     QPushButton* cancel = new QPushButton(" ");
     QPushButton* pause = new QPushButton(" ");
-
+    QLabel *speed = new QLabel("20KBs" );
     cancel->setFixedSize(23, 23);
     pause->setFixedSize(23, 23);
     cancel->setObjectName("Status_CancelButton");
@@ -54,8 +54,8 @@ StatusArea::StatusArea(QWidget *parent) :
     // Bottom Half
     bottomRight->addWidget(numFiles);
     bottomRight->setAlignment(Qt::AlignRight);
-    bottomLeft->addWidget(shape1);
-    bottomLeft->addWidget(shape2);
+    bottomLeft->addWidget(cancel);
+    bottomLeft->addWidget(pause);
     bottomLeft->setAlignment(Qt::AlignLeft);
     bottomLeft->setSpacing(0);
     bottom->addLayout(bottomLeft);
@@ -71,7 +71,7 @@ StatusArea::StatusArea(QWidget *parent) :
 }
 
 // Enable StyleSheets
-void statusArea::paintEvent(QPaintEvent* event){
+void StatusArea::paintEvent(QPaintEvent* event){
     QStyleOption o;
     o.initFrom(this);
     QPainter p(this);

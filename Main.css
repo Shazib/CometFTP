@@ -1,0 +1,119 @@
+MainWindow{
+	 padding:0px; 
+	 background-color: #fefefe; 
+	 border-style:solid; 
+	 border-color:#bbbbbb; 
+	 border-width:1px;	
+}
+
+#btnQuit{
+	background-image:url(:/images/ExitButton.png); 
+	border-style:none; 
+	width:30px; 
+	height:26px
+}
+
+#btnQuit:hover{
+	background-color:#e04343; 
+	background-image:url(:/images/ExitButton2.png);
+}
+
+#btnMin{
+	background-image:url(:/images/MinimiseGrey.png); 
+	border-style:none; 
+	width:30px; 
+	height:26px;
+}
+
+#btnMin:hover{
+	background-color:#cccccc; 
+	background-image:url(:/images/MinimiseWhite.png);
+}
+
+#btnMax{
+    background-image:url(:/images/MaximiseGrey.png); 
+    border-style:none; 
+    width:30px; 
+    height:26px;
+}
+
+#btnMax:hover{
+	background-color:#cccccc; 
+	background-image:url(:/images/MaximiseWhite.png);
+}
+
+#btnMenu{
+	background-image:url(:/images/CometButton.png); 
+	border-style:none; 
+	width:102px; 
+	height:27px;
+}
+
+StatusArea{
+	background-color:#ebebeb; 
+        border:1px solid #cdcdcd;
+	border-radius:1px;
+}
+
+StatusArea QLabel, StatusArea QPushButton{
+	background-color: #ebebeb;
+}
+
+#Status_CancelButton{ 
+    border-style:none; 
+    background-color:#ebebeb; 
+    color:red; 
+    background-image:url(:/images/stopsmall.png);
+    background-position: bottom left; 
+    background-repeat:no-repeat;
+}
+
+/*StatusArea QPushButton:hover{
+	background-color:#FFFFFF; 
+        background-image:url(:/images/pausesmall.png)
+
+}
+*/
+#Status_PauseButton{
+	border-style:none;
+	background-color:#ebebeb;
+	margin:0px 0px 0px 0px;
+	color:red;
+        background-image:url(:/images/pausesmall.png);
+	background-position: bottom left;
+	background-repeat:no-repeat;
+
+}
+
+#Status_Progress{
+	border: 1px solid #cdcdcd;
+	border-radius: 6px;
+	background: white;
+	padding:1px;
+}
+
+#Status_Progress::chunk:horizontal{
+	margin-left:1px;
+	border:1px solid #0E7DFD; 
+	border-radius:4px; 
+	background: #0E7DFD;
+}
+
+#Status_NumberFiles{
+    background:gray; 
+    border-radius:10px; 
+    padding: 4px 4px 4px; 
+    margin-left:15px; 
+    margin-top: 5px; 
+    font-weight:bold; 
+    color:white;
+}
+
+
+
+#Server_Widget{
+    background-color:#cdcdcd;
+}
+ServerExplorer{
+    background-color:#ebebeb;
+}

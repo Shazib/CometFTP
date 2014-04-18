@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/images">
+    <qresource prefix="/">
         <file>images/CometButton.png</file>
         <file>images/ExitButton.png</file>
         <file>images/ExitButton2.png</file>
@@ -9,6 +9,9 @@
         <file>images/MinimiseWhite.png</file>
         <file>images/pausesmall.png</file>
         <file>images/stopsmall.png</file>
+        <file>images/Menu.svg</file>
+        <file>images/Screen.svg</file>
+        <file>Main.css</file>
     </qresource>
     <qresource prefix="/files">
         <file>Main.css</file>
