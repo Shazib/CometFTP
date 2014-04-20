@@ -56,7 +56,7 @@ SFTPSite::SFTPSite(QWidget *parent, std::string host, std::string user, std::str
     }
 
     // Authenticating server identity
-    if (verify_knownhost(my_ssh_session) < 0){
+    if (verify_knownhost() < 0){
         QMessageBox msgBox;
         msgBox.setText("The server could not be authenticated");
         msgBox.setInformativeText("Please check the help documentation");
@@ -70,29 +70,29 @@ SFTPSite::SFTPSite(QWidget *parent, std::string host, std::string user, std::str
     } else {status = true;}
 
     // Authenticating user
-    if (verify_user(my_ssh_session,user,pass) < 0){
+    if (verify_user(user,pass) < 0){
         status = false;
     } else {
         status = true;
     }
 
-    if (sftp_connection(my_ssh_session) != SSH_OK){
+    if (sftp_connection() != SSH_OK){
 
     }
-    sftp_listdir(my_ssh_session,sftp);
+
 
 
 }
 
 // Verify Host using SSH Key
-int SFTPSite::verify_knownhost(ssh_session session)
+int SFTPSite::verify_knownhost()
 {
 
     int state, hlen, rc;
     unsigned char *hash = NULL;
     QMessageBox msgBox;
-    state = ssh_is_server_known(session); // Check if key known
-    hlen = ssh_get_pubkey_hash(session, &hash); //store binary of key
+    state = ssh_is_server_known(my_ssh_session); // Check if key known
+    hlen = ssh_get_pubkey_hash(my_ssh_session, &hash); //store binary of key
     if (hlen < 0){return -1;} // Check key is a key
     char *publickeyhash = ssh_get_hexa(hash,hlen);
     QString pubkey(publickeyhash);
@@ -207,9 +207,9 @@ int SFTPSite::verify_knownhost(ssh_session session)
 }
 
 // Verify User using Password
-int SFTPSite::verify_user(ssh_session session, std::string user, std::string pass){
+int SFTPSite::verify_user(std::string user, std::string pass){
 
-   int rc = ssh_userauth_password(session, user.c_str(),pass.c_str());
+   int rc = ssh_userauth_password(my_ssh_session, user.c_str(),pass.c_str());
     if (rc != SSH_AUTH_SUCCESS){
         QMessageBox msgBox;
         msgBox.setText("Error Authenticating user");
@@ -223,12 +223,12 @@ int SFTPSite::verify_user(ssh_session session, std::string user, std::string pas
 }
 
 // Open SFTP session using the SSH Session
-int SFTPSite::sftp_connection(ssh_session session)
+int SFTPSite::sftp_connection()
 {
 
 
     int rc;
-    sftp = sftp_new(session);
+    sftp = sftp_new(my_ssh_session);
 
     if (sftp == NULL){
         // Error allocating SFTP Session
@@ -244,36 +244,42 @@ int SFTPSite::sftp_connection(ssh_session session)
         return rc;
     }
 
-    sftp_dir dir;
-    sftp_attributes attributes;
-
-
-    dir = sftp_opendir(sftp,"");
-    if (!dir){
-        qDebug() << "error opening directory";
-    }
-    else{
-        qDebug() << "SUCCESS" ;
-    }
-
-
     return SSH_OK;
 
 }
 
 
-void SFTPSite::sftp_listdir(ssh_session session, sftp_session sftp)
+void SFTPSite::sftp_listdir(QString path)
 {
+    // Initial Setup
+    values->clear();
     sftp_dir dir;
     sftp_attributes attributes;
     int rc;
+    const char* directoryPath = path.toLocal8Bit().data();
 
-    dir = sftp_opendir(sftp,"/home/");
+    // Open the Directory
+    dir = sftp_opendir(sftp, directoryPath);
+
     if (!dir){
         qDebug() << "error opening directory";
     }
 
+    // Create the StringList to store the data
+    while ((attributes = sftp_readdir(sftp, dir)) != NULL){
 
+        // check its not hidden.
+        if (strncmp(attributes->name,".",1) != 0) {
+
+        *values << QString::fromStdString(attributes->name) <<
+                                 QString::number(attributes->size) <<
+                                 //getPermissions(attributes->permissions) <<
+                                 QString::number(attributes->permissions) <<
+                                 QString::fromStdString(attributes->owner) <<
+                                 getType(attributes->type);
+        rc++;
+        }
+    }
 }
 
 // Get Permissions in Human Readable syntax
@@ -354,7 +360,13 @@ QString SFTPSite::getType(uint8_t type)
 }
 
 
+// Public Access Method
+QStringList dirList(QString path){
 
+   sftp_listdir(path);
+
+   return values;
+}
 
 
 
