@@ -1,6 +1,6 @@
 #include "ServerFileModel.h"
 
-ServerFileModel::ServerFileModel(QObject *parent) :
+ServerFileModel::ServerFileModel(QObject* parent, int numRows, QStringList* dataList) :
     QAbstractTableModel(parent)
 {
     dataList_ = dataList;
@@ -13,7 +13,7 @@ int ServerFileModel::columnCount(const QModelIndex &parent) const{
 int ServerFileModel::rowCount(const QModelIndex &parent) const{
     return row;
 }
-QVariant MyModel::data(const QModelIndex &index, int role) const{
+QVariant ServerFileModel::data(const QModelIndex &index, int role) const{
 
     if (!index.isValid())
         return QVariant();

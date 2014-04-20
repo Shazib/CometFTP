@@ -16,14 +16,18 @@ signals:
 public slots:
 
 private:
+    ssh_session my_ssh_session;
+    sftp_session sftp;
     int verify_knownhost(ssh_session session);
     int verify_user(ssh_session session, std::string user, std::string pass);
     int sftp_connection(ssh_session session);
+    QString SFTPSite::getPermissions(uint32_t permissions);
+    QString SFTPSite::getType(uint8_t type);
 
 public:
    bool status;
-   sftp_session my_sftp_session;
-   void sftp_listdir(ssh_session session, sftp_session sftp);
+
+   void sftp_listdir();
 };
 
-#endif // COMER_SFTPSITE_H
+#endif // COMET_SFTPSITE_H

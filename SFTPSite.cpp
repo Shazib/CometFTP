@@ -15,7 +15,7 @@ SFTPSite::SFTPSite(QWidget *parent, std::string host, std::string user, std::str
 
     // New SSH session
 
-    ssh_session my_ssh_session = ssh_new();
+    my_ssh_session = ssh_new();
     if (my_ssh_session == NULL){
 
         QMessageBox msgBox;
@@ -76,18 +76,17 @@ SFTPSite::SFTPSite(QWidget *parent, std::string host, std::string user, std::str
         status = true;
     }
 
-    if (sftp_connection(my_ssh_session) !=SSH_OK){
+    if (sftp_connection(my_ssh_session) != SSH_OK){
 
     }
-    sftp_listdir(my_ssh_session, my_sftp_session);
+    sftp_listdir(my_ssh_session,sftp);
 
-    //sftp_free(my_sftp_session);
-    //ssh_disconnect(my_ssh_session);
-    //ssh_free(my_ssh_session);
 
 }
 
-int SFTPSite::verify_knownhost(ssh_session session){
+// Verify Host using SSH Key
+int SFTPSite::verify_knownhost(ssh_session session)
+{
 
     int state, hlen, rc;
     unsigned char *hash = NULL;
@@ -207,6 +206,7 @@ int SFTPSite::verify_knownhost(ssh_session session){
     return -1;
 }
 
+// Verify User using Password
 int SFTPSite::verify_user(ssh_session session, std::string user, std::string pass){
 
    int rc = ssh_userauth_password(session, user.c_str(),pass.c_str());
@@ -222,9 +222,11 @@ int SFTPSite::verify_user(ssh_session session, std::string user, std::string pas
     return 0;
 }
 
-int SFTPSite::sftp_connection(ssh_session session){
+// Open SFTP session using the SSH Session
+int SFTPSite::sftp_connection(ssh_session session)
+{
 
-    sftp_session sftp;
+
     int rc;
     sftp = sftp_new(session);
 
@@ -254,14 +256,14 @@ int SFTPSite::sftp_connection(ssh_session session){
         qDebug() << "SUCCESS" ;
     }
 
-    my_sftp_session = sftp;
-    sftp_free(sftp);
+
     return SSH_OK;
 
 }
 
 
-void SFTPSite::sftp_listdir(ssh_session session, sftp_session sftp){
+void SFTPSite::sftp_listdir(ssh_session session, sftp_session sftp)
+{
     sftp_dir dir;
     sftp_attributes attributes;
     int rc;
@@ -274,9 +276,82 @@ void SFTPSite::sftp_listdir(ssh_session session, sftp_session sftp){
 
 }
 
+// Get Permissions in Human Readable syntax
+QString SFTPSite::getPermissions(uint32_t permissions)
+{
 
+    // Converting the decimal returned by libssh into an octal.
+    int rem, i=1, octal= 0;
 
+    while (permissions != 0){
+        rem = permissions%8;
+        permissions /= 8;
+        octal+= rem * i;
+        i *= 10;
+    }
 
+    // Reading the octal into a string
+
+    // last three digits for permissions.
+    QString temp = QString::number(octal);
+    QString final = "";
+    i = temp.count();
+
+    // Add each set of permissions to string
+    for (int a=3; a >= 1; a--){
+
+        switch(temp[i-a].digitValue())
+        {
+        case 0:
+            final.append(QString("---"));
+            break;
+        case 1:
+            final.append(QString("--x"));
+            break;
+        case 2:
+            final.append(QString("-w-"));
+            break;
+        case 3:
+            final.append(QString("-wx"));
+            break;
+        case 4:
+            final.append(QString("r--"));
+            break;
+        case 5:
+            final.append(QString("r-x"));
+            break;
+        case 6:
+            final.append(QString("rw-"));
+            break;
+        case 7:
+            final.append(QString("rwx"));
+            break;
+
+        }
+    }
+
+    // Return the correct string
+    return final;
+
+}
+
+// Get File Type
+QString SFTPSite::getType(uint8_t type)
+{
+    switch(type)
+    {
+    case SSH_FILEXFER_TYPE_DIRECTORY:
+        return QString("Folder");
+    case SSH_FILEXFER_TYPE_REGULAR:
+        return QString("File");
+    case SSH_FILEXFER_TYPE_SYMLINK:
+        return QString("Symlink");
+    case SSH_FILEXFER_TYPE_SPECIAL:
+        return QString("Special");
+    case SSH_FILEXFER_TYPE_UNKNOWN:
+        return QString("Unknown");
+    }
+}
 
 
 
