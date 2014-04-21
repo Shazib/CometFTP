@@ -23,12 +23,16 @@ private:
     int sftp_connection();
     QString getPermissions(uint32_t permissions);
     QString getType(uint8_t type);
-    QStringList* values;
-    void sftp_listdir(QString path);
-    
+    QStringList values;
+    int sftp_listdir(QString path);
+    std::string host, user, pass, port;
+
 public:
    bool status;
-   QStringList dirList(QString path);
+   bool init();
+   void cleanup();
+   QPair<int, QStringList> listDir(QString path);
+   int numRows;
 };
 
 #endif // COMET_SFTPSITE_H

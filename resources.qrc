@@ -12,8 +12,11 @@
         <file>images/Menu.svg</file>
         <file>images/Screen.svg</file>
         <file>Main.css</file>
-    </qresource>
-    <qresource prefix="/files">
-        <file>Main.css</file>
+        <file>images/left37.svg</file>
+        <file>images/pause15.svg</file>
+        <file>images/play43.svg</file>
+        <file>images/right33.svg</file>
+        <file>images/square64.svg</file>
+        <file>images/power26.svg</file>
     </qresource>
 </RCC>

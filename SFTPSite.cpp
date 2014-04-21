@@ -5,16 +5,19 @@
 
 #include <libssh/sftp.h>
 
-SFTPSite::SFTPSite(QWidget *parent, std::string host, std::string user, std::string pass, std::string port) :
+SFTPSite::SFTPSite(QWidget *parent, std::string _host, std::string _user, std::string _pass, std::string _port) :
     QWidget(parent)
 {
 
     // Required variables
     int verbosity = SSH_LOG_PROTOCOL;
     int portNum = atoi(port.c_str());
+    host = _host;
+    user = _user;
+    port = _port;
+    pass = _pass;
 
     // New SSH session
-
     my_ssh_session = ssh_new();
     if (my_ssh_session == NULL){
 
@@ -32,7 +35,12 @@ SFTPSite::SFTPSite(QWidget *parent, std::string host, std::string user, std::str
     ssh_options_set(my_ssh_session, SSH_OPTIONS_PORT, &portNum);
     ssh_options_set(my_ssh_session, SSH_OPTIONS_USER, user.c_str());
 
-    // Connecting to server
+}
+
+// Init the connection
+bool SFTPSite::init()
+{
+    // Connect to Site
     int rc;
     rc = ssh_connect(my_ssh_session);
     if (rc != SSH_OK){
@@ -40,7 +48,7 @@ SFTPSite::SFTPSite(QWidget *parent, std::string host, std::string user, std::str
         QString temp = QString::fromUtf8(ssh_get_error(my_ssh_session));
         // Show Alert
         QMessageBox msgBox;
-        msgBox.setText("Error Connecting to server");
+        msgBox.setText("Error calling ssh_connect");
         msgBox.setInformativeText("Click for details on the error");
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setDefaultButton(QMessageBox::Ok);
@@ -50,10 +58,8 @@ SFTPSite::SFTPSite(QWidget *parent, std::string host, std::string user, std::str
         ssh_disconnect(my_ssh_session);
         ssh_free(my_ssh_session);
         status = false;
-
-    } else {
-        status = true;
-    }
+        return false;
+    } else {status = true;}
 
     // Authenticating server identity
     if (verify_knownhost() < 0){
@@ -67,19 +73,23 @@ SFTPSite::SFTPSite(QWidget *parent, std::string host, std::string user, std::str
         ssh_disconnect(my_ssh_session);
         ssh_free(my_ssh_session);
         status = false;
+        return false;
     } else {status = true;}
 
     // Authenticating user
     if (verify_user(user,pass) < 0){
         status = false;
-    } else {
-        status = true;
-    }
+        ssh_disconnect(my_ssh_session);
+        ssh_free(my_ssh_session);
+        return false;
+    } else { status = true; }
+
+    // Setup SFTP connection over SSH session
 
     if (sftp_connection() != SSH_OK){
-
-    }
-
+        status = false;
+        return false;
+    } else { return true;}
 
 
 }
@@ -144,7 +154,7 @@ int SFTPSite::verify_knownhost()
             rc = msgBox.exec();
             switch (rc) {
                 case QMessageBox::Ok:
-                    if (ssh_write_knownhost(session) < 0){
+                    if (ssh_write_knownhost(my_ssh_session) < 0){
                         msgBox.setText("Sorry, there was a problem saving the key");
                         msgBox.setInformativeText("");
                         msgBox.setStandardButtons(QMessageBox::Ok);
@@ -171,7 +181,7 @@ int SFTPSite::verify_knownhost()
             rc = msgBox.exec();
             switch (rc) {
                 case QMessageBox::Ok:
-                    if (ssh_write_knownhost(session) < 0){
+                    if (ssh_write_knownhost(my_ssh_session) < 0){
                         msgBox.setText("Sorry, there was a problem saving the key");
                         msgBox.setInformativeText("");
                         msgBox.setStandardButtons(QMessageBox::Ok);
@@ -207,7 +217,8 @@ int SFTPSite::verify_knownhost()
 }
 
 // Verify User using Password
-int SFTPSite::verify_user(std::string user, std::string pass){
+int SFTPSite::verify_user(std::string user, std::string pass)
+{
 
    int rc = ssh_userauth_password(my_ssh_session, user.c_str(),pass.c_str());
     if (rc != SSH_AUTH_SUCCESS){
@@ -232,8 +243,16 @@ int SFTPSite::sftp_connection()
 
     if (sftp == NULL){
         // Error allocating SFTP Session
-        QString error(ssh_get_error(session));
+        QString error(ssh_get_error(my_ssh_session));
         return SSH_ERROR;
+        QMessageBox msgBox;
+        msgBox.setText("Error Creating SFTP");
+        msgBox.setInformativeText("Click for details on the error");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        msgBox.setDetailedText(error);
+        msgBox.exec();
+        return rc;
     }
 
     rc = sftp_init(sftp);
@@ -241,6 +260,13 @@ int SFTPSite::sftp_connection()
         // Error initialising SFTP session
         QString error(sftp_get_error(sftp));
         sftp_free(sftp);
+        QMessageBox msgBox;
+        msgBox.setText("Error Initing STFP");
+        msgBox.setInformativeText("Click for details on the error");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        msgBox.setDetailedText(error);
+        msgBox.exec();
         return rc;
     }
 
@@ -248,15 +274,15 @@ int SFTPSite::sftp_connection()
 
 }
 
-
-void SFTPSite::sftp_listdir(QString path)
+int SFTPSite::sftp_listdir(QString path)
 {
     // Initial Setup
-    values->clear();
+    values.clear();
     sftp_dir dir;
     sftp_attributes attributes;
-    int rc;
-    const char* directoryPath = path.toLocal8Bit().data();
+    int rc = 0;
+    QByteArray ba = path.toLocal8Bit();
+    const char* directoryPath = ba.data();
 
     // Open the Directory
     dir = sftp_opendir(sftp, directoryPath);
@@ -271,7 +297,7 @@ void SFTPSite::sftp_listdir(QString path)
         // check its not hidden.
         if (strncmp(attributes->name,".",1) != 0) {
 
-        *values << QString::fromStdString(attributes->name) <<
+        values << QString::fromStdString(attributes->name) <<
                                  QString::number(attributes->size) <<
                                  //getPermissions(attributes->permissions) <<
                                  QString::number(attributes->permissions) <<
@@ -280,6 +306,11 @@ void SFTPSite::sftp_listdir(QString path)
         rc++;
         }
     }
+
+    sftp_closedir(dir);
+    sftp_attributes_free(attributes);
+    qDebug() << "Number of Rows" << rc;
+    return rc;
 }
 
 // Get Permissions in Human Readable syntax
@@ -360,15 +391,20 @@ QString SFTPSite::getType(uint8_t type)
 }
 
 
-// Public Access Method
-QStringList dirList(QString path){
 
-   sftp_listdir(path);
-
-   return values;
+void SFTPSite::cleanup()
+{
+    sftp_free(sftp);
+    ssh_disconnect(my_ssh_session);
+    ssh_free(my_ssh_session);
 }
+// Public Access Method
+QPair<int, QStringList> SFTPSite::listDir(QString path)
+{
+    int a = sftp_listdir(path);
 
-
+    return { a, values};
+}
 
 
 

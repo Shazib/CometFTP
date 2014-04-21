@@ -4,10 +4,11 @@
  */
 
 #include "LocalExplorer.h"
+#include "AddressBar.h"
 
 #include <QtWidgets>
 
-LocalExplorer::LocalExplorer(QWidget *parent) :
+LocalExplorer::LocalExplorer(QWidget* parent) :
     QWidget(parent)
 {
 
@@ -16,19 +17,35 @@ LocalExplorer::LocalExplorer(QWidget *parent) :
     //mainDir = new QString(QDir::currentPath());
 
     // File System Model
-    QFileSystemModel *model = new QFileSystemModel;
+    QFileSystemModel* model = new QFileSystemModel;
     model->setRootPath(QDir::rootPath());
 
-    // Create File Tree
-    QTreeView *tree = new QTreeView(this);
-    tree->setModel(model);
-    tree->setStyle(QStyleFactory::create("Fusion"));
-    tree->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    tree->setContentsMargins(-1,0,-1,-1);
+    // Test File System
+    QFileSystemModel* model2 = new QFileSystemModel;
+    model2->setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
+    model2->setRootPath("C:/");
+
+    QTableView* table = new QTableView();
+    table->setModel(model);
+    table->verticalHeader()->hide();
+    table->horizontalHeader()->setVisible(true);
+    table->horizontalHeader()->show();
+    table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table->setSelectionMode(QAbstractItemView::SingleSelection);
+    table->setShowGrid(false);
+    table->setAlternatingRowColors(true);
+    table->setStyle(QStyleFactory::create("Fusion"));
+    table->setObjectName("ServerTableView");
+    table->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    table->verticalHeader()->setDefaultSectionSize(18);
+
+    // Address Bar
+    AddressBar* addressBar = new AddressBar(0,false,QString::fromStdString( QDir::rootPath().toStdString()));
 
     // Layout
     QVBoxLayout* layout = new QVBoxLayout();
-    layout->addWidget(tree);
+    layout->addWidget(addressBar);
+    layout->addWidget(table);
     layout->setContentsMargins(0,0,0,0);
     layout->setSpacing(0);
     this->setLayout(layout);

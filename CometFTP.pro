@@ -21,7 +21,7 @@ SOURCES += main.cpp\
     ServerExplorer.cpp \
     SFTPSite.cpp \
     ServerFileModel.cpp \
-    ServerFileBrowser.cpp
+    AddressBar.cpp
 
 HEADERS  += \
     MainWindow.h \
@@ -32,7 +32,7 @@ HEADERS  += \
     ServerExplorer.h \
     SFTPSite.h \
     ServerFileModel.h \
-    ServerFileBrowser.h
+    AddressBar.h
 
 RESOURCES += \
     resources.qrc

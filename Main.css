@@ -71,8 +71,7 @@ StatusArea QLabel, StatusArea QPushButton{
 
 #Status_PauseButton{
 	background-color:#FFFFFF; 
-        background-image:url(:/images/pausesmall.png)
-
+    background-image:url(:/images/pausesmall.png)
 }
 
 #Status_PauseButton{
@@ -83,7 +82,6 @@ StatusArea QLabel, StatusArea QPushButton{
         background-image:url(:/images/pausesmall.png);
 	background-position: bottom left;
 	background-repeat:no-repeat;
-
 }
 
 #Status_Progress{
@@ -110,12 +108,22 @@ StatusArea QLabel, StatusArea QPushButton{
     color:white;
 }
 
-
-
 #Server_Widget{
     background-color:#ebebeb;
 }
 
 ServerExplorer{
     background-color:#ebebeb;
+}
+
+#ServerTableView{
+    gridline-color:none;
+    alternate-background-color:#FFFFFF;
+    background-color:#efefef;
+}
+
+AddressBar QPushButton{
+    background-color:none;
+    border:none;
+	
 }

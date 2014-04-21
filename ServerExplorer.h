@@ -3,6 +3,10 @@
 
 #include <QWidget>
 #include <QtWidgets>
+
+#include "SFTPSite.h"
+#include "SlidingStackedWidget.h"
+#include "ServerFileModel.h"
 class ServerExplorer : public QWidget
 {
     Q_OBJECT
@@ -14,16 +18,18 @@ public:
     std::string _password;
 signals:
 
+
 public slots:
 
 private slots:
     void bookmarkBtnPressed();
     void sftpBtnPressed();
     void connectBtnPressed();
+    void rowSelected(const QModelIndex indx);
 
 private:
     QFrame* toolbar;
-    QWidget* explorer;
+    QWidget* explorerSlide;
     QWidget* siteManager;
     QWidget* bookmarkSlide;
     QWidget* connectSlide;
@@ -32,14 +38,17 @@ private:
     QPushButton* sftpBtn;
     QPushButton* connectBtn;
     QPushButton* connectBookmarkBtn;
-
+    SFTPSite* site;
+    SlidingStackedWidget* mainSlider;
+    ServerFileModel* model;
     //Connect Area
     QLineEdit* host;
     QLineEdit* user;
     QLineEdit* password;
     QLineEdit* port;
-
+    QString mainDir;
     int animTime;
+    QTableView* table;
 
 };
 

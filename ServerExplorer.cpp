@@ -8,6 +8,8 @@
  */
 #include "ServerExplorer.h"
 #include "SlidingStackedWidget.h"
+#include "AddressBar.h"
+
 #include <QtWidgets>
 #include <QDebug>
 
@@ -21,34 +23,25 @@ ServerExplorer::ServerExplorer(QWidget *parent) :
     animTime=(_min+_max)>>1;
 
     // Main Slider Setup
-    SlidingStackedWidget* mainSlider = new SlidingStackedWidget(this);
+    mainSlider = new SlidingStackedWidget(this);
     QVBoxLayout* mainLayout = new QVBoxLayout();
 
     // Setup Slides For Main Slider
-    QWidget* mainExplorerSlide = new QWidget(); // Server File Browser
-    QWidget* mainManagerSlide = new QWidget(); // Connect + Bookmarks
-
-    qDebug() << "Starting site manager";
     setupSiteManager();
-    qDebug() << "Finishing site manager ";
+    explorerSlide = new QWidget();
 
     // Add Slides to Main Slider
     mainSlider->addWidget(siteManager);
-    mainSlider->addWidget(mainManagerSlide);
+    mainSlider->addWidget(explorerSlide);
 
     // Setup this Widget with main slider
-    mainSlider->addWidget(mainManagerSlide);
-    mainSlider->addWidget(mainExplorerSlide);
-    //mainLayout->addWidget(toolbar);
     mainLayout->addWidget(mainSlider);
     mainLayout->setContentsMargins(0,0,0,0);
     this->setLayout(mainLayout);
 
     qDebug() << "connecting slots";
 
-    // Connect Button click slots
-    QObject::connect(bookmarkBtn,SIGNAL(clicked()),this,SLOT(bookmarkBtnPressed()));
-    QObject::connect(sftpBtn,SIGNAL(clicked()),this,SLOT(sftpBtnPressed()));
+
 }
 
 
@@ -82,7 +75,7 @@ void ServerExplorer::setupSiteManager()
     toolbarLayout->setContentsMargins(0,0,0,0);
     toolbar->setLayout(toolbarLayout);
 
-    qDebug() << "toolbar setup done";
+
 
 // Setup Slider with bookmarks and connect
 
@@ -155,15 +148,16 @@ void ServerExplorer::setupSiteManager()
 
 
     // Create Connections
+    QObject::connect(bookmarkBtn,SIGNAL(clicked()),this,SLOT(bookmarkBtnPressed()));
+    QObject::connect(sftpBtn,SIGNAL(clicked()),this,SLOT(sftpBtnPressed()));
     QObject::connect(bookmarkBtn, SIGNAL(clicked()),managerSlider,SLOT(slideInNext()));
     QObject::connect(sftpBtn, SIGNAL(clicked()),managerSlider, SLOT(slideInPrev()));
+    QObject::connect(connectBtn, SIGNAL(clicked()),this,SLOT(connectBtnPressed()));
     managerSlider->setSpeed(animTime);
     managerSlider->setWrap(false);
 }
 
-/*
- * Handling Button Presses
- */
+// Handling Button Presses
 void ServerExplorer::bookmarkBtnPressed()
 {
     // Set Styling
@@ -185,14 +179,75 @@ void ServerExplorer::sftpBtnPressed()
 
 void ServerExplorer::connectBtnPressed()
 {
-    // When connect is pressed, the login details are passed to the main widget.
-    _host = host->text().toLocal8Bit().constData();
-    _user = user->text().toLocal8Bit().constData();
-    _password = password->text().toLocal8Bit().constData();
-    _port = port->text().toLocal8Bit().constData();
+    // When connect is pressed, the login details are passed
 
-    // Init explorer
+    _host = "nova.so"; //host->text().toLocal8Bit().constData();
+    _user = "user"; //user->text().toLocal8Bit().constData();
+    _password = ""; //password->text().toLocal8Bit().constData();
+    _port = "22"; //port->text().toLocal8Bit().constData();
 
-    // Switch to explorer
+    // Setup SFTPSite class connection
+    site = new SFTPSite(this,_host, _user, _password, _port);
+    if( !site->init()) {
+        // ERROR
+    } else {
+        // SUCCESS
+    }
 
+    // Setup Explorer slide
+    table = new QTableView(this);
+    table->verticalHeader()->hide();
+    table->horizontalHeader()->setVisible(true);
+    table->horizontalHeader()->show();
+    table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table->setSelectionMode(QAbstractItemView::SingleSelection);
+    table->setShowGrid(false);
+    table->setAlternatingRowColors(true);
+    table->setStyle(QStyleFactory::create("Fusion"));
+    table->setObjectName("ServerTableView");
+    table->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    table->verticalHeader()->setDefaultSectionSize(18);
+
+
+
+    // Setup initial root directory view
+    QPair<int,QStringList> pair = site->listDir("/");
+    model = new ServerFileModel(this, pair.first, pair.second);
+    table->setModel(model);
+
+    // Switch Main Slider;
+    QVBoxLayout* mainExplorerLayout = new QVBoxLayout();
+    mainExplorerLayout->setContentsMargins(0,0,0,0);
+
+    AddressBar* temp = new AddressBar();
+    mainExplorerLayout->addWidget(temp);
+    mainExplorerLayout->addWidget(table);
+    explorerSlide->setLayout(mainExplorerLayout);
+    mainSlider->slideInNext();
+
+    // Connect Table Click event
+    QObject::connect(table,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(rowSelected(QModelIndex)));
+
+
+}
+
+// Handle Clicks on folders in table
+void ServerExplorer::rowSelected(const QModelIndex indx) {
+
+    if (indx.model()->data(indx.model()->index(indx.row(),4,indx),Qt::DisplayRole).toString() == QString("Folder")){
+
+        // Set Main Dir String
+        mainDir += "/";
+        mainDir +=indx.model()->data(indx.model()->index(indx.row(),0,indx),Qt::DisplayRole).toString();
+
+        // Cleanup old model, set with new data.
+        delete model;
+        QPair<int,QStringList> pair = site->listDir(mainDir);
+        model = new ServerFileModel(this,pair.first, pair.second);
+        table->setModel(model);
+
+
+    }
+
+   qDebug() << "MAIN AT REAL END" << mainDir;
 }
