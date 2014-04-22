@@ -4,6 +4,9 @@
 #include <QWidget>
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
+#include <libssh/callbacks.h>
+#include <pthread.h>
+
 
 class SFTPSite : public QWidget
 {
@@ -21,6 +24,7 @@ private:
     int verify_knownhost();
     int verify_user(std::string user, std::string pass);
     int sftp_connection();
+    //int sftp_upload
     QString getPermissions(uint32_t permissions);
     QString getType(uint8_t type);
     QStringList values;

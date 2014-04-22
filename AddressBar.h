@@ -10,6 +10,7 @@ public:
     explicit AddressBar(QWidget *parent = 0,
                         bool _disconnectVisible = true,
                         QString _defaultPath = "");
+    void updatePath(QString path);
 
 private:
     QPushButton* backBtn;
@@ -17,12 +18,24 @@ private:
     QLineEdit* addressEdit;
     QPushButton* disconnectBtn;
     QString defaultPath;
+    QStringList backList;
+    QStringList forwardList;
     void setupView();
     bool disconnectVisible;
 
+
+
 signals:
+    void updatedPath(QString path);
+    void disconnect();
 
 public slots:
+
+private slots:
+    void backButtonClick();
+    void forwardButtonClick();
+    void addressEditClick();
+    void disconnectClicked();
 
 };
 

@@ -7,6 +7,8 @@
 #include "SFTPSite.h"
 #include "SlidingStackedWidget.h"
 #include "ServerFileModel.h"
+#include "AddressBar.h"
+
 class ServerExplorer : public QWidget
 {
     Q_OBJECT
@@ -26,7 +28,7 @@ private slots:
     void sftpBtnPressed();
     void connectBtnPressed();
     void rowSelected(const QModelIndex indx);
-
+    void updatedPath(QString path);
 private:
     QFrame* toolbar;
     QWidget* explorerSlide;
@@ -49,6 +51,7 @@ private:
     QString mainDir;
     int animTime;
     QTableView* table;
+    AddressBar* addressBar;
 
 };
 

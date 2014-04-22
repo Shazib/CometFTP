@@ -4,7 +4,6 @@
  */
 
 #include "LocalExplorer.h"
-#include "AddressBar.h"
 
 #include <QtWidgets>
 
@@ -13,19 +12,11 @@ LocalExplorer::LocalExplorer(QWidget* parent) :
 {
 
     // Setup Directory
-    //QDir* directory = new QDir(QDir::root());
-    //mainDir = new QString(QDir::currentPath());
-
     // File System Model
-    QFileSystemModel* model = new QFileSystemModel;
+    model = new QFileSystemModel();
     model->setRootPath(QDir::rootPath());
 
-    // Test File System
-    QFileSystemModel* model2 = new QFileSystemModel;
-    model2->setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
-    model2->setRootPath("C:/");
-
-    QTableView* table = new QTableView();
+    table = new QTableView();
     table->setModel(model);
     table->verticalHeader()->hide();
     table->horizontalHeader()->setVisible(true);
@@ -40,7 +31,8 @@ LocalExplorer::LocalExplorer(QWidget* parent) :
     table->verticalHeader()->setDefaultSectionSize(18);
 
     // Address Bar
-    AddressBar* addressBar = new AddressBar(0,false,QString::fromStdString( QDir::rootPath().toStdString()));
+    addressBar = new AddressBar(0,false,QString::fromStdString( QDir::rootPath().toStdString()));
+    QObject::connect(addressBar, SIGNAL(updatedPath(QString)), SLOT(updatedPath(QString)));
 
     // Layout
     QVBoxLayout* layout = new QVBoxLayout();
@@ -49,5 +41,40 @@ LocalExplorer::LocalExplorer(QWidget* parent) :
     layout->setContentsMargins(0,0,0,0);
     layout->setSpacing(0);
     this->setLayout(layout);
+
+    // Connect Table Click event
+    QObject::connect(table,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(rowSelected(QModelIndex)));
+
+
+}
+
+void LocalExplorer::updatedPath(QString path)
+{
+    QDir* dir = new QDir(path);
+    if (dir->exists()){
+        table->setRootIndex(model->setRootPath(path));
+        mainDir = path;
+        qDebug() << path;
+    }
+    else{
+        addressBar->updatePath(mainDir);
+    }
+
+}
+// Row Selected update Path
+// Handle Clicks on folders in table
+void LocalExplorer::rowSelected(const QModelIndex indx) {
+
+    // Get File Info
+    QFileInfo info = model->fileInfo(indx);
+    // Check if folder
+    if (info.isDir()){
+        // Reset Model
+        table->setRootIndex(model->setRootPath(info.filePath()));
+        // Update AddressBar
+        addressBar->updatePath(info.filePath());
+        mainDir = info.filePath();
+
+    }
 
 }

@@ -11,12 +11,10 @@
 #include "AddressBar.h"
 
 #include <QtWidgets>
-#include <QDebug>
 
 ServerExplorer::ServerExplorer(QWidget *parent) :
     QWidget(parent)
 {
-    qDebug() << "Starting server explorer";
     // Initial Setup
     int _min=500;
     int _max=1500;
@@ -39,7 +37,6 @@ ServerExplorer::ServerExplorer(QWidget *parent) :
     mainLayout->setContentsMargins(0,0,0,0);
     this->setLayout(mainLayout);
 
-    qDebug() << "connecting slots";
 
 
 }
@@ -125,7 +122,6 @@ void ServerExplorer::setupSiteManager()
     connectLayout->setAlignment(Qt::AlignCenter);
     connectLayout->setContentsMargins(0,0,0,0);
 
-    qDebug() << "Connect Area Done";
     // Setup bookmark area
 
 
@@ -183,7 +179,7 @@ void ServerExplorer::connectBtnPressed()
 
     _host = "nova.so"; //host->text().toLocal8Bit().constData();
     _user = "user"; //user->text().toLocal8Bit().constData();
-    _password = ""; //password->text().toLocal8Bit().constData();
+    _password = "O0h4n7hony="; //password->text().toLocal8Bit().constData();
     _port = "22"; //port->text().toLocal8Bit().constData();
 
     // Setup SFTPSite class connection
@@ -218,9 +214,13 @@ void ServerExplorer::connectBtnPressed()
     // Switch Main Slider;
     QVBoxLayout* mainExplorerLayout = new QVBoxLayout();
     mainExplorerLayout->setContentsMargins(0,0,0,0);
+    mainExplorerLayout->setSpacing(0);
 
-    AddressBar* temp = new AddressBar();
-    mainExplorerLayout->addWidget(temp);
+    // Address Bar
+    addressBar = new AddressBar(0,true,"/");
+    QObject::connect(addressBar,SIGNAL(updatedPath(QString)),this,SLOT(updatedPath(QString)));
+
+    mainExplorerLayout->addWidget(addressBar);
     mainExplorerLayout->addWidget(table);
     explorerSlide->setLayout(mainExplorerLayout);
     mainSlider->slideInNext();
@@ -228,6 +228,20 @@ void ServerExplorer::connectBtnPressed()
     // Connect Table Click event
     QObject::connect(table,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(rowSelected(QModelIndex)));
 
+}
+
+void ServerExplorer::updatedPath(QString path)
+{
+    QPair<int,QStringList> pair = site->listDir(path);
+    if (pair.first == -1){ // Dir doesn't exist
+        // Reset Address Bar
+        addressBar->updatePath(mainDir);
+    } else {
+    delete model;
+    model = new ServerFileModel(this,pair.first, pair.second);
+    mainDir = path;
+    table->setModel(model);
+    }
 
 }
 
@@ -246,8 +260,10 @@ void ServerExplorer::rowSelected(const QModelIndex indx) {
         model = new ServerFileModel(this,pair.first, pair.second);
         table->setModel(model);
 
+        // Update AddressBar
+        addressBar->updatePath(mainDir);
+
 
     }
 
-   qDebug() << "MAIN AT REAL END" << mainDir;
 }

@@ -3,11 +3,14 @@
 #include <QDebug>
 #include <QMessageBox>
 
-#include <libssh/sftp.h>
+#include <libssh/callbacks.h>
 
 SFTPSite::SFTPSite(QWidget *parent, std::string _host, std::string _user, std::string _pass, std::string _port) :
     QWidget(parent)
 {
+
+    ssh_threads_set_callbacks(ssh_threads_get_pthread());
+    ssh_init();
 
     // Required variables
     int verbosity = SSH_LOG_PROTOCOL;
@@ -91,6 +94,14 @@ bool SFTPSite::init()
         return false;
     } else { return true;}
 
+
+    // Testing pthread
+
+    int a, b, c;
+    pthread_t threada, threadb, threadc;
+    a = pthread_create(&threada, NULL, sftp_listdir("/"),"/");
+    b = pthread_create(&threadb, NULL, sftp_listdir,"/");
+    c = pthread_create(&threadb, NULL, sftp_listdir,"/");
 
 }
 
@@ -289,7 +300,11 @@ int SFTPSite::sftp_listdir(QString path)
 
     if (!dir){
         qDebug() << "error opening directory";
-    }
+        // Directory Probably Doesn't Exist!
+        return -1;
+
+
+    } else {
 
     // Create the StringList to store the data
     while ((attributes = sftp_readdir(sftp, dir)) != NULL){
@@ -310,7 +325,9 @@ int SFTPSite::sftp_listdir(QString path)
     sftp_closedir(dir);
     sftp_attributes_free(attributes);
     qDebug() << "Number of Rows" << rc;
+
     return rc;
+    }
 }
 
 // Get Permissions in Human Readable syntax
@@ -389,8 +406,6 @@ QString SFTPSite::getType(uint8_t type)
         return QString("Unknown");
     }
 }
-
-
 
 void SFTPSite::cleanup()
 {

@@ -9,6 +9,11 @@ AddressBar::AddressBar(QWidget *parent, bool _disconnectVisible, QString _defaul
     defaultPath = _defaultPath;
     setupView();
 
+
+    QObject::connect(backBtn, SIGNAL(clicked()),this, SLOT(backButtonClick()));
+    QObject::connect(forwardBtn, SIGNAL(clicked()),this,SLOT(forwardButtonClick()));
+    QObject::connect(addressEdit, SIGNAL(returnPressed()), this, SLOT(addressEditClick()));
+    QObject::connect(disconnectBtn, SIGNAL(clicked()), this, SLOT(disconnectClicked()));
 }
 
 void AddressBar::setupView()
@@ -42,5 +47,85 @@ void AddressBar::setupView()
     }
     this->setLayout(mainLayout);
 
+}
+
+void AddressBar::disconnectClicked()
+{
+    emit disconnect();
+}
+
+void AddressBar::updatePath(QString path)
+{
+    // Add old path to back list
+    backList << defaultPath;
+    // Set new default path
+    defaultPath = path;
+    // Set Line Edit
+    addressEdit->setText(path);
+}
+
+void AddressBar::backButtonClick()
+{
+    qDebug() << "Back Button Clicked";
+
+    if (backList.count() >= 1){
+    // Add to forward
+    forwardList << defaultPath;
+    // Set New Default
+    defaultPath = backList.last();
+    // Remove path from back
+    backList.removeLast();
+    //set Line edit
+    addressEdit->setText(defaultPath);
+
+    emit updatedPath(defaultPath);
+
+    }
+}
+
+void AddressBar::forwardButtonClick()
+{
+    if (forwardList.count() >= 1){
+    backList << defaultPath;
+    defaultPath = forwardList.last();
+    forwardList.removeLast();
+    addressEdit->setText(defaultPath);
+    emit updatedPath(defaultPath);
+    }
+}
+
+void AddressBar::addressEditClick()
+{
+    if (disconnectVisible) {
+        // SSH, send path
+        /********************************/
+        emit updatedPath(addressEdit->text());
+
+    } else {
+        QDir dir(addressEdit->text());
+        if (!dir.exists()){
+            // Does Not Exist
+            qDebug() << "does not exist";
+            addressEdit->setText(defaultPath);
+            // Do nothing
+        } else {
+            qDebug() << "adding default path " << defaultPath << " to list";
+           backList << defaultPath;
+           qDebug() << "setting new path " <<addressEdit->text();
+           defaultPath = addressEdit->text();
+            // Local, Send path
+           emit updatedPath(addressEdit->text());
+
+           qDebug() << "backlist last " << backList.last();
+
+        }
+   }
 
 }
+
+
+
+
+
+
+

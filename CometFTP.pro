@@ -48,3 +48,4 @@ DEPENDPATH += $$PWD/../../../../../../Users/Shazib/Downloads
 win32: LIBS += -ldwmapi
 
 win32: LIBS += -lssh
+win32: LIBS += -lssh_threads

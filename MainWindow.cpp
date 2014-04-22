@@ -4,7 +4,7 @@
  */
 
 #include "MainWindow.h"
-#include "QDebug"
+
 
 MainWindow::MainWindow(QFrame *parent)
     : QFrame(parent)
@@ -109,7 +109,6 @@ void MainWindow::createMainLayout()
     bottomLeftLayout->addWidget(localExplorer);
     bottomRightLayout->addWidget(serverExplorer);
     // Proxy Widgets for Slider
-    qDebug() << "Proxy widgets done";
     QWidget* localExplorerWidget = new QWidget();
     QWidget* serverExplorerWidget = new QWidget();
     localExplorerWidget->setLayout(bottomLeftLayout);
@@ -161,14 +160,14 @@ void MainWindow::switchSlides()
 {
 
     if( switched == false){
-        qDebug() << "explorer is up";
+
        mainContent->slideInIdx(1,SlidingStackedWidget::BOTTOM2TOP);
-       qDebug() << "switched to next";
+
        switched = true;
     } else if (switched == true) {
-        qDebug() << "downloads is up";
+
         mainContent->slideInIdx(0,SlidingStackedWidget::BOTTOM2TOP);
-        qDebug() << "switched to previous";
+
         switched = false;
     }
 
