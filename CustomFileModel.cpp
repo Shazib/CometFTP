@@ -14,6 +14,7 @@ CustomFileModel::CustomFileModel(QObject *parent) :
     QFileSystemModel(parent)
 {
 
+
 }
 // Returns the mime types that this class supports for drops
 QStringList CustomFileModel::mimeTypes() const
@@ -75,3 +76,9 @@ bool CustomFileModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
     }
 
 }
+
+Qt::DropActions CustomFileModel::supportedDropActions() const
+{
+return Qt::CopyAction | Qt::MoveAction | Qt::LinkAction;
+}
+

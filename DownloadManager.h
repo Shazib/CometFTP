@@ -18,7 +18,7 @@ signals:
     void initThread(std::string host, std::string user, std::string pass, std::string port);
     void startDownload(QString source, QString destination);
     void startUpload(QString source, QString destination);
-
+    void setProgress(int progress);
 
 private:
     std::string host, user, password, port;
@@ -38,7 +38,7 @@ private:
 public slots:
     // Thread slots
     void receivePercentage();
-    void recieveDownloadComplete();
+    void receiveDownloadComplete();
 
     void addData(QString _type, QString _source, QString _destination, QString sftpType);
     void addLocalFolder(QString path);

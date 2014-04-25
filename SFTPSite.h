@@ -1,22 +1,23 @@
 #ifndef COMET_SFTPSITE_H
 #define COMET_SFTPSITE_H
 
-#include <QWidget>
+//#include <QWidget>
+#include <QObject>
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
 #include <libssh/callbacks.h>
 #include <pthread.h>
+#include <QtWidgets>
 
-
-class SFTPSite : public QWidget
+class SFTPSite : public QObject
 {
     Q_OBJECT
 public:
-    explicit SFTPSite(QWidget *parent = 0, std::string host = "", std::string user = "", std::string pass ="", std::string port = "");
+    explicit SFTPSite(QObject *parent = 0, std::string host = "", std::string user = "", std::string pass ="", std::string port = "");
 
 public slots:
     void startDownload(QString source, QString destination);
-    void startupload(QString source, QString destination);
+    void startUpload(QString source, QString destination);
     void threadInit(std::string _host, std::string _user, std::string _pass, std::string _port);
 
 
@@ -51,7 +52,7 @@ private:
     };
     bool _abort;
     bool _working;
-    QMutex mutex;
+
 
 public:
     QString globalServer;

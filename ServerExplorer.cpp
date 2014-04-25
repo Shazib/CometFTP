@@ -181,7 +181,7 @@ void ServerExplorer::connectBtnPressed()
 
     _host = "nova.so"; //host->text().toLocal8Bit().constData();
     _user = "user"; //user->text().toLocal8Bit().constData();
-    _password = "O0h4n7hony="; //password->text().toLocal8Bit().constData();
+    _password = ""; //password->text().toLocal8Bit().constData();
     _port = "22"; //port->text().toLocal8Bit().constData();
 
     emit sendCredentials(_host, _user, _password, _port);

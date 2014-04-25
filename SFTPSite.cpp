@@ -4,16 +4,18 @@
 #include "SFTPSite.h"
 
 #include <QDebug>
-#include <QtWidgets>
+//#include <QtWidgets>
 
 #include <libssh/callbacks.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <cstdio>
 
-SFTPSite::SFTPSite(QWidget *parent, std::string _host, std::string _user, std::string _pass, std::string _port) :
-    QWidget(parent)
+SFTPSite::SFTPSite(QObject *parent, std::string _host, std::string _user, std::string _pass, std::string _port) :
+    QObject(parent)
 {
 
+    qDebug() << "Stfp created";
     ssh_threads_set_callbacks(ssh_threads_get_pthread());
     ssh_init();
 
@@ -227,7 +229,7 @@ int SFTPSite::silent_verify_knownhost()
 {
     int state, hlen, rc;
     unsigned char *hash = NULL;
-    QMessageBox msgBox;
+    //QMessageBox msgBox;
     state = ssh_is_server_known(my_ssh_session); // Check if key known
     hlen = ssh_get_pubkey_hash(my_ssh_session, &hash); //store binary of key
     if (hlen < 0){return -1;} // Check key is a key
@@ -501,16 +503,18 @@ int SFTPSite::downloadfile(QString source, QString Destination)
 
     // Get Filename.
     QStringList split = source.split("/");
-    split.removeLast();
+    //split.removeLast();
     QString fileName = split.last();
-
+    qDebug() << "Source " << source;
+    qDebug() << "File name " << fileName;
     // Check if file exists locally
-    QString localPath = Destination + "/" + fileName;
+    QString localPath = Destination + fileName;
+    qDebug() << "Local Path "  << localPath;
     QFile file;
     file.setFileName(localPath);
-    if (file.exists()){
+  /*  if (file.exists()){
         // File Exists, handle.
-        QMessageBox msgBox;
+        //QMessageBox msgBox;
         msgBox.setText("The file Already Exists.");
         msgBox.setInformativeText("Do you want to overwrite?");
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No );
@@ -531,7 +535,7 @@ int SFTPSite::downloadfile(QString source, QString Destination)
         }
 
 
-    }
+    }*/
 
     // Now we can continue to download the file
     if (res == DLOAD_OVERWRITE){
@@ -547,19 +551,26 @@ int SFTPSite::downloadfile(QString source, QString Destination)
         int percent = fileSize / 100;
         int percentCounter = 0;
 
-        char buffer[MAX_XFER_BUF_SIZE]; // Buffer where files are written
+        char buffer[200]; // Buffer where files are written
         int async_request;
         int nbytes; // num bytes transferred
         long counter;
         int rc;
-        FILE* fp = fopen(Destination.toLocal8Bit().data(),"ab+"); // file for writing, create if doesnt exist
+        FILE* fp;
+        qDebug() << "The destination " << Destination.toLocal8Bit().data();
+
+        qDebug() << "Full filename " << localPath;
+        fp = fopen(localPath.toLocal8Bit().data(),"a+"); // file for writing, create if doesnt exist
+        if (fp == NULL){
+            qDebug() << "File is null";
+        }
         access_type = O_RDONLY; // Read Only
 
         file = sftp_open(sftp, source.toLocal8Bit().data(),access_type,0);
 
         if (file == NULL) {
             // Can't open file
-            ssh_get_error(session);
+            ssh_get_error(my_ssh_session);
             qDebug() << SSH_ERROR;
         }
         // Set Non Blocking
@@ -584,9 +595,12 @@ int SFTPSite::downloadfile(QString source, QString Destination)
         while (nbytes > 0 || nbytes == SSH_AGAIN){
             if (nbytes > 0) {
                 // Write
-                qDebug() << "Reading";
-                int result = fputs(nbytes,fp);
+                qDebug() << "Writing";
+                //fputs(nbytes,fp);
+                qDebug() <<  "BUFFER IS " << buffer;
+                int result = fputs(buffer,fp);
 
+                qDebug() << "Wrote: " << result;
                 // Percent
                 counter = counter + 16;
                 if (counter >= percentCounter) {
@@ -594,7 +608,7 @@ int SFTPSite::downloadfile(QString source, QString Destination)
                     counter  = 0;
                 }
 
-                if (results == EOF){ qDebug() << "Error Writing Data"; return DLOAD_FAILED;}
+                if (result == EOF){ qDebug() << "Error Writing Data"; return DLOAD_FAILED;}
 
                 // Loop
                 async_request = sftp_async_read_begin(file, sizeof(buffer));
@@ -610,7 +624,7 @@ int SFTPSite::downloadfile(QString source, QString Destination)
         }
         if (nbytes < 0) {
             fprintf(stderr, "Error while reading file: %s\n",
-            ssh_get_error(session));
+            ssh_get_error(my_ssh_session));
             sftp_close(file);
             return DLOAD_FAILED;
         }
@@ -626,7 +640,7 @@ int SFTPSite::downloadfile(QString source, QString Destination)
 
 
     }
-
+    qDebug() << "download Complete";
     return DLOAD_COMPLETE;
 
 
@@ -731,18 +745,19 @@ int SFTPSite::dloadFile(QString source, QString dest)
 {
     int a =  downloadfile(source,dest);
     if ( a == DLOAD_COMPLETE){
-        emit downloadFinished(a);
+        emit downloadComplete(a);
     }
 }
 
 // Slots for threaded download/upload handling
 void SFTPSite::startDownload(QString source, QString destination)
 {
+    qDebug() << "Download in sftp started";
     int a = downloadfile(source, destination);
     emit downloadComplete(a);
 }
 
-void SFTPSite::startUpload(QString source, QString destination, int size)
+void SFTPSite::startUpload(QString source, QString destination)
 {
 
 }
@@ -753,7 +768,13 @@ void SFTPSite::threadInit(std::string _host, std::string _user, std::string _pas
     user = _user;
     pass = _pass;
     port= _port;
+    int portNum = atoi(port.c_str());
+    ssh_options_set(my_ssh_session, SSH_OPTIONS_HOST, host.c_str());
+    //ssh_options_set(my_ssh_session, SSH_OPTIONS_LOG_VERBOSITY, &verbosity);
+    ssh_options_set(my_ssh_session, SSH_OPTIONS_PORT, &portNum);
+    ssh_options_set(my_ssh_session, SSH_OPTIONS_USER, user.c_str());
     this->silent_init();
+    qDebug() << "Thread SFTP Init";
 
 }
 

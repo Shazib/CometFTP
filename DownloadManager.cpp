@@ -6,19 +6,22 @@ DownloadManager::DownloadManager(QWidget *parent) :
     // Setup View + initial states
     QHBoxLayout* mainLayout = new QHBoxLayout(this);
 
+    // Setup table widget
     table = new QTableWidget();
     mainLayout->addWidget(table);
     this->setLayout(mainLayout);
-
-    // Setup table widget
     numRows = 0;
     table->setColumnCount(4);
     table->setRowCount(numRows);
 
+    // Thread + queue management
     percentage = 0;
     fileCounter = 0;
-    // Header
+    downloading = false;
+    isAlive = false;
 
+
+    qRegisterMetaType<std::string>("std::string");
 }
 
 void DownloadManager::addData(QString _type, QString _source, QString _destination, QString sftpType){
@@ -48,7 +51,7 @@ void DownloadManager::addData(QString _type, QString _source, QString _destinati
             table->setItem((numRows-1),0,typeItem);
             table->setItem((numRows-1),1,sourceItem);
             table->setItem((numRows-1),2,destinationItem);
-            table->setItem((numRows-1),2,statusItem);
+            table->setItem((numRows-1),3,statusItem);
         }
 
     }
@@ -69,7 +72,7 @@ void DownloadManager::addData(QString _type, QString _source, QString _destinati
             table->setItem((numRows-1),0,typeItem);
             table->setItem((numRows-1),1,sourceItem);
             table->setItem((numRows-1),2,destinationItem);
-            table->setItem((numRows-1),2,statusItem);
+            table->setItem((numRows-1),3,statusItem);
         }
     }
     // When Data is added, the queue is automatically processed.
@@ -81,17 +84,28 @@ void DownloadManager::addData(QString _type, QString _source, QString _destinati
         thread = new QThread();
         sftp->moveToThread(thread);
         QObject::connect(this,SIGNAL(initThread(std::string,std::string,std::string,std::string)),sftp,SLOT(threadInit(std::string,std::string,std::string,std::string)));
-        QObject::connect(this,SIGNAL(startDownload(QString,QString)),sftp,SLOT(startDownload(QString,QString,int)));
-        QObject::connect(this,SIGNAL(startUpload(QString,QString)),sftp,SLOT(startupload(QString,QString)));
-        QObject::connect(sftp,SIGNAL(updateProgress()),this,SLOT(receivePercentage()));
-        QObject::connect(sftp,SIGNAL(downloadComplete(int)), this,SLOT(recieveDownloadComplete()));
+        thread->start();
         emit initThread(host,user,password,port);
+        QObject::connect(this,SIGNAL(startDownload(QString,QString)),sftp,SLOT(startDownload(QString,QString)));
+        QObject::connect(this,SIGNAL(startUpload(QString,QString)),sftp,SLOT(startUpload(QString,QString)));
+        QObject::connect(sftp,SIGNAL(updateProgress()),this,SLOT(receivePercentage()));
+        QObject::connect(sftp,SIGNAL(downloadComplete(int)), this,SLOT(receiveDownloadComplete()));
+
     }
     // Start Queue
     if (!downloading){
         // Start queue
-        recieveDownloadComplete();
-
+        // Get data
+        QString _type = table->item(fileCounter,0)->text();
+        QString _source = table->item(fileCounter,1)->text();
+        QString _destination = table->item(fileCounter,2)->text();
+        // If download
+        if (_type == "Download"){
+        //table->item(fileCounter,3)->setText("Processing");
+            qDebug() << "Starting Download";
+            emit startDownload(_source, _destination);
+            downloading = true;
+        }
 
     }
 }
@@ -184,15 +198,37 @@ void DownloadManager::receiveCredentials(std::string _host, std::string _user, s
 }
 
 
-void DownloadManager::recieveDownloadComplete(){
+void DownloadManager::receiveDownloadComplete(){
 
-    // Start or continue queue processing
-    // Select data
+    // A Download just completed.
+    //table->item(fileCounter,3)->setText("Complete");
+    fileCounter++;
+    if (fileCounter > numRows-1){
+        downloading = false;
+        return;
+    }
+    // Otherwise
+    QString _type = table->item(fileCounter,0)->text();
     QString _source = table->item(fileCounter,1)->text();
-    QString _destination = table->item(fileCounter,3)->text();
+    QString _destination = table->item(fileCounter,2)->text();
+    table->item(fileCounter,3)->setText("Processing");
+
+    if (_type == "Download"){
+        emit startDownload(_source,_destination);
+    }
+
+
+
+
 
 }
 
+void DownloadManager::receivePercentage()
+{
+    percentage++;
+    emit setProgress(percentage);
+
+}
 
 
 
