@@ -20,6 +20,8 @@ ServerExplorer::ServerExplorer(QWidget *parent) :
     int _max=1500;
     animTime=(_min+_max)>>1;
 
+    mainDir = "/";
+
     // Main Slider Setup
     mainSlider = new SlidingStackedWidget(this);
     QVBoxLayout* mainLayout = new QVBoxLayout();
@@ -182,6 +184,8 @@ void ServerExplorer::connectBtnPressed()
     _password = "O0h4n7hony="; //password->text().toLocal8Bit().constData();
     _port = "22"; //port->text().toLocal8Bit().constData();
 
+    emit sendCredentials(_host, _user, _password, _port);
+
     // Setup SFTPSite class connection
     site = new SFTPSite(this,_host, _user, _password, _port);
     if( !site->init()) {
@@ -199,16 +203,26 @@ void ServerExplorer::connectBtnPressed()
     table->setSelectionMode(QAbstractItemView::SingleSelection);
     table->setShowGrid(false);
     table->setAlternatingRowColors(true);
-    table->setStyle(QStyleFactory::create("Fusion"));
+    //table->setStyle(QStyleFactory::create("Fusion"));
     table->setObjectName("ServerTableView");
     table->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     table->verticalHeader()->setDefaultSectionSize(18);
 
 
+    // Testing Drag Drop
+
+    //table->setDragDropMode(QAbstractItemView::DragDrop);
+    table->setDragEnabled(true);
+    table->viewport()->setAcceptDrops(true);
+    table->setDropIndicatorShown(true);
+
+
+    // table->setSortingEnabled(true);
 
     // Setup initial root directory view
     QPair<int,QStringList> pair = site->listDir("/");
-    model = new ServerFileModel(this, pair.first, pair.second);
+    model = new ServerFileModel(this, pair.first, pair.second, "/");
+
     table->setModel(model);
 
     // Switch Main Slider;
@@ -227,6 +241,7 @@ void ServerExplorer::connectBtnPressed()
 
     // Connect Table Click event
     QObject::connect(table,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(rowSelected(QModelIndex)));
+    QObject::connect(model,SIGNAL(sendDropData(QString,QString,QString,QString)),this,SLOT(receiveDropData(QString,QString,QString,QString)));
 
 }
 
@@ -238,7 +253,8 @@ void ServerExplorer::updatedPath(QString path)
         addressBar->updatePath(mainDir);
     } else {
     delete model;
-    model = new ServerFileModel(this,pair.first, pair.second);
+    model = new ServerFileModel(this,pair.first, pair.second, path);
+    QObject::connect(model,SIGNAL(sendDropData(QString,QString,QString,QString)),this,SLOT(receiveDropData(QString,QString,QString,QString)));
     mainDir = path;
     table->setModel(model);
     }
@@ -251,13 +267,14 @@ void ServerExplorer::rowSelected(const QModelIndex indx) {
     if (indx.model()->data(indx.model()->index(indx.row(),4,indx),Qt::DisplayRole).toString() == QString("Folder")){
 
         // Set Main Dir String
-        mainDir += "/";
-        mainDir +=indx.model()->data(indx.model()->index(indx.row(),0,indx),Qt::DisplayRole).toString();
 
+        mainDir +=indx.model()->data(indx.model()->index(indx.row(),0,indx),Qt::DisplayRole).toString();
+        mainDir += "/";
         // Cleanup old model, set with new data.
         delete model;
         QPair<int,QStringList> pair = site->listDir(mainDir);
-        model = new ServerFileModel(this,pair.first, pair.second);
+        model = new ServerFileModel(this,pair.first, pair.second, mainDir);
+        QObject::connect(model,SIGNAL(sendDropData(QString,QString,QString,QString)),this,SLOT(receiveDropData(QString,QString,QString,QString)));
         table->setModel(model);
 
         // Update AddressBar
@@ -267,3 +284,13 @@ void ServerExplorer::rowSelected(const QModelIndex indx) {
     }
 
 }
+
+//Slot to recieve drop data from model
+void ServerExplorer::receiveDropData(QString type, QString source, QString destination, QString sftpType)
+{
+    // Send Data To Parent
+    qDebug() << "Data recieved";
+    emit sendDropData(type,source,destination,sftpType);
+}
+
+//Signal to send drop data to parent

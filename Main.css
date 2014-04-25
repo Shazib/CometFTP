@@ -118,8 +118,9 @@ ServerExplorer{
 
 #ServerTableView{
     gridline-color:none;
-    alternate-background-color:#FFFFFF;
-    background-color:#efefef;
+    alternate-background-color:#efefef;
+    background-color:#ffffff;
+    border:1px solid #efefef;
 }
 
 AddressBar QPushButton{

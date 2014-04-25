@@ -105,6 +105,9 @@ void MainWindow::createMainLayout()
     // Setup Required Widgets
     localExplorer = new LocalExplorer();
     serverExplorer = new ServerExplorer();
+    QObject::connect(serverExplorer,SIGNAL(sendCredentials(std::string,std::string,std::string,std::string)),this,SLOT(recieveCredentials(std::string,std::string,std::string,std::string)));
+    QObject::connect(serverExplorer,SIGNAL(sendDropData(QString,QString,QString,QString)),SLOT(recieveDropData(QString,QString,QString,QString)));
+    QObject::connect(localExplorer,SIGNAL(sendDropData(QString,QString,QString,QString)),SLOT(recieveDropData(QString,QString,QString,QString)));
 
     bottomLeftLayout->addWidget(localExplorer);
     bottomRightLayout->addWidget(serverExplorer);
@@ -122,12 +125,13 @@ void MainWindow::createMainLayout()
     explorerSlider->setLayout(bottomLayout);
 
     // Empty Frame to Test
-    QWidget* temp = new QWidget();
-
+    //QWidget* temp = new QWidget();
+    downloadManager = new DownloadManager(this);
+    QObject::connect(this,SIGNAL(sendCredentials(std::string,std::string,std::string,std::string)),downloadManager,SLOT(receiveCredentials(std::string,std::string,std::string,std::string)));
     // Create Bottom Stacked Slider Widget
     mainContent = new SlidingStackedWidget(this);
     mainContent->addWidget(explorerSlider);
-    mainContent->addWidget(temp);
+    mainContent->addWidget(downloadManager);
     mainContent->setSpeed(animTime);
     mainContent->setVerticalMode(true);
     mainContent->setAnimation(QEasingCurve::OutQuart);
@@ -171,6 +175,21 @@ void MainWindow::switchSlides()
         switched = false;
     }
 
+
+}
+
+
+
+void MainWindow::recieveCredentials(std::string host, std::string user, std::string password, std::string port)
+{
+    qDebug() << "Credentials Recieved";
+    emit sendCredentials(host,user, password,port);
+
+}
+void MainWindow::recieveDropData(QString type, QString source, QString destination, QString sftpType)
+{
+    // Send to downloader
+    downloadManager->addData(type,source,destination,sftpType);
 
 }
 

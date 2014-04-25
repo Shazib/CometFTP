@@ -18,8 +18,10 @@ public:
     std::string _user;
     std::string _port;
     std::string _password;
-signals:
 
+signals:
+    void sendCredentials(std::string host, std::string user, std::string password, std::string port);
+    void sendDropData(QString type, QString source, QString desination, QString stfpType);
 
 public slots:
 
@@ -29,6 +31,8 @@ private slots:
     void connectBtnPressed();
     void rowSelected(const QModelIndex indx);
     void updatedPath(QString path);
+    void receiveDropData(QString type, QString source, QString destination, QString sftpType);
+
 private:
     QFrame* toolbar;
     QWidget* explorerSlide;

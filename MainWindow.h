@@ -14,6 +14,7 @@
 #include "LocalExplorer.h"
 #include "StatusArea.h"
 #include "SlidingStackedWidget.h"
+#include "DownloadManager.h"
 
 class MainWindow : public QFrame
 {
@@ -34,6 +35,7 @@ private:
     LocalExplorer* localExplorer;
     ServerExplorer* serverExplorer;
     SlidingStackedWidget* mainContent;
+    DownloadManager* downloadManager;
     // Layouts
     QVBoxLayout* mainLayout;
     QHBoxLayout* topLayout;
@@ -64,8 +66,12 @@ private slots:
     void maxSize();
 
 public slots:
-    //void connectClicked();
     void switchSlides();
+    void recieveCredentials(std::string host, std::string user, std::string password, std::string port);
+    void recieveDropData(QString type, QString source, QString destination, QString stfpType);
+
+signals:
+    void sendCredentials(std::string host, std::string user, std::string password, std::string port);
 
 };
 

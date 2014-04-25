@@ -10,11 +10,11 @@ StatusArea::StatusArea(QWidget *parent) :
     this->setFixedHeight(70);
 
     // Required Widgets
-    QLabel* file = new QLabel("Filename");
-    QPushButton* numFiles = new QPushButton("255");
-    QPushButton* cancel = new QPushButton(" ");
-    QPushButton* pause = new QPushButton(" ");
-    QLabel *speed = new QLabel("20KBs" );
+    file = new QLabel("Filename");
+    numFiles = new QPushButton("255");
+    cancel = new QPushButton(" ");
+    pause = new QPushButton(" ");
+    speed = new QLabel("20KBs" );
     cancel->setFixedSize(23, 23);
     pause->setFixedSize(23, 23);
     cancel->setObjectName("Status_CancelButton");
@@ -40,7 +40,7 @@ StatusArea::StatusArea(QWidget *parent) :
     top->addLayout(topRight);
 
     // Setup progressbar
-    QProgressBar* progress = new QProgressBar();
+    progress = new QProgressBar();
     progress->setObjectName("Status_Progress");
     progress->setMaximum(99);
     progress->setMinimum(0);
@@ -81,4 +81,24 @@ void StatusArea::paintEvent(QPaintEvent* event)
     QPainter p(this);
     style()->drawPrimitive(QStyle::PE_Widget, &o, &p, this);
 
+}
+
+void StatusArea::setFileName(QString fileName)
+{
+   file->setText("File: " +fileName);
+}
+
+void StatusArea::setNumFiles(QString _numFiles)
+{
+    numFiles->setText(_numFiles);
+}
+
+void StatusArea::setSpeed(QString _speed)
+{
+    speed->setText(_speed + " KB/s");
+}
+
+void StatusArea::setProgress(int progressValue)
+{
+    progress->setValue(progressValue);
 }
