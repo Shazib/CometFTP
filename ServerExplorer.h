@@ -32,6 +32,7 @@ private slots:
     void rowSelected(const QModelIndex indx);
     void updatedPath(QString path);
     void receiveDropData(QString type, QString source, QString destination, QString sftpType);
+    void addBookmark();
 
 private:
     QFrame* toolbar;

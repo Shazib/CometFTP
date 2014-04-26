@@ -10,7 +10,10 @@ int main(int argc, char *argv[])
     NcFramelessHelper fh;
     fh.activateOn(&w);
 
-    //QString cssString("");
+    QCoreApplication::setOrganizationName("BCU");
+    QCoreApplication::setApplicationName("CometFTP");
+    QCoreApplication::setApplicationVersion("0.0.1");
+
     QFile cssFile(":/Main.css");
     cssFile.open(QFile::ReadOnly);
     QString cssString = QLatin1String(cssFile.readAll());

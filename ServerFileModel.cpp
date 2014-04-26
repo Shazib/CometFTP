@@ -1,5 +1,6 @@
-#include "ServerFileModel.h"
 
+
+#include "ServerFileModel.h"
 #include <QStringListModel>
 
 ServerFileModel::ServerFileModel(QObject* parent, int numRows, QStringList dataList, QString _path) :

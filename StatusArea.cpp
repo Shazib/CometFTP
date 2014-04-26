@@ -11,10 +11,10 @@ StatusArea::StatusArea(QWidget *parent) :
 
     // Required Widgets
     file = new QLabel("Filename");
-    numFiles = new QPushButton("255");
+    numFiles = new QPushButton("00");
     cancel = new QPushButton(" ");
     pause = new QPushButton(" ");
-    speed = new QLabel("20KBs" );
+    speed = new QLabel("KBs" );
     cancel->setFixedSize(23, 23);
     pause->setFixedSize(23, 23);
     cancel->setObjectName("Status_CancelButton");
@@ -42,10 +42,10 @@ StatusArea::StatusArea(QWidget *parent) :
     // Setup progressbar
     progress = new QProgressBar();
     progress->setObjectName("Status_Progress");
-    progress->setMaximum(99);
+    progress->setMaximum(100);
     progress->setMinimum(0);
-    progress->setRange(0,99);
-    progress->setValue(50);
+    progress->setRange(0,100);
+    progress->setValue(0);
     progress->setTextVisible(false);
     progress->setFixedHeight(12);
     mid->addWidget(progress);
@@ -70,7 +70,6 @@ StatusArea::StatusArea(QWidget *parent) :
 
     // Slots
     QObject::connect(numFiles, SIGNAL(clicked()),this->parent(), SLOT(switchSlides()));
-
 }
 
 // Enable StyleSheets
@@ -88,9 +87,13 @@ void StatusArea::setFileName(QString fileName)
    file->setText("File: " +fileName);
 }
 
-void StatusArea::setNumFiles(QString _numFiles)
+void StatusArea::setNumFiles(int _numFiles)
 {
-    numFiles->setText(_numFiles);
+    QString s = QString::number(_numFiles);
+    if (s.count() == 1){
+        s = " " + s + " ";
+    }
+    numFiles->setText(s);
 }
 
 void StatusArea::setSpeed(QString _speed)

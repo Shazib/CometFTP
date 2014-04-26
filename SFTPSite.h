@@ -1,12 +1,9 @@
 #ifndef COMET_SFTPSITE_H
 #define COMET_SFTPSITE_H
 
-//#include <QWidget>
 #include <QObject>
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
-#include <libssh/callbacks.h>
-#include <pthread.h>
 #include <QtWidgets>
 
 class SFTPSite : public QObject
@@ -19,13 +16,15 @@ public slots:
     void startDownload(QString source, QString destination);
     void startUpload(QString source, QString destination);
     void threadInit(std::string _host, std::string _user, std::string _pass, std::string _port);
+    void cancelDownload();
+    void pauseDownload();
+    void receiveTimer();
 
 
 signals:
     void downloadComplete(int status);
     void updateProgress();
-
-public slots:
+    void sendSpeed(int bytes);
 
 private:
     int sftp_getAllFiles(QString path, QString destination);
@@ -50,8 +49,10 @@ private:
         DLOAD_CANCEL,
         DLOAD_ERROR
     };
-    bool _abort;
-    bool _working;
+    bool cancel = false;
+    bool pause = false;
+    QMutex mutex;
+    int totalBytes;
 
 
 public:
@@ -67,7 +68,6 @@ public:
     int isDir(QString fileName);
     QStringList getAllFiles(QString path, QString destination);
     int dloadFile(QString source, QString dest);
-    void abort();
 };
 
 #endif // COMET_SFTPSITE_H

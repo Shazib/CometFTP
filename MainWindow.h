@@ -49,6 +49,7 @@ private:
     bool max; // For Window Maximising with frameless helper
     int animTime; // For setting animation times on slides
     bool switched;
+    QString bookmarks;
 
     // SFTP Session
     std::string host;

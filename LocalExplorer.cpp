@@ -41,6 +41,10 @@ LocalExplorer::LocalExplorer(QWidget* parent) :
     table->setObjectName("ServerTableView");
     table->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     table->verticalHeader()->setDefaultSectionSize(18);
+    table->resizeColumnsToContents();
+    QHeaderView* header = table->horizontalHeader();
+    header->setResizeContentsPrecision(99);
+    table->setHorizontalHeader(header);
 
     // Enabling Drag Drop on Table
     table->setDragDropMode(QAbstractItemView::DragDrop);
@@ -75,6 +79,7 @@ void LocalExplorer::updatedPath(QString path)
     QDir* dir = new QDir(path);
     if (dir->exists()){
         table->setRootIndex(model->setRootPath(path));
+        table->resizeColumnsToContents();
         mainDir = path;
         qDebug() << path;
     }
@@ -95,6 +100,7 @@ void LocalExplorer::rowSelected(const QModelIndex indx) {
     if (info.isDir()){
         // Reset Model
         table->setRootIndex(model->setRootPath(info.filePath()));
+        table->resizeColumnsToContents();
         // Update AddressBar
         addressBar->updatePath(info.filePath());
         mainDir = info.filePath();

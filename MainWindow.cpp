@@ -29,6 +29,8 @@ MainWindow::MainWindow(QFrame *parent)
 
 
 
+
+
 }
 // Setup main GUI components
 void MainWindow::createGuiComponents()
@@ -139,6 +141,13 @@ void MainWindow::createMainLayout()
     mainLayout->addLayout(topLayout,0);
     mainLayout->addWidget(mainContent,0,0);
     this->setLayout(mainLayout);
+
+    QObject::connect(downloadManager, SIGNAL(setProgress(int)), statusArea,SLOT(setProgress(int)));
+    QObject::connect(downloadManager, SIGNAL(setFileName(QString)),statusArea,SLOT(setFileName(QString)));
+    QObject::connect(downloadManager, SIGNAL(setNumFiles(int)),statusArea,SLOT(setNumFiles(int)));
+    QObject::connect(statusArea->cancel,SIGNAL(clicked()),downloadManager,SLOT(receiveCancelClick()));
+    QObject::connect(statusArea->pause, SIGNAL(clicked()),downloadManager,SLOT(receivePauseClick()));
+    QObject::connect(downloadManager,SIGNAL(setSpeed(QString)),statusArea,SLOT(setSpeed(QString)));
 }
 
 void MainWindow::maxSize()

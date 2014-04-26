@@ -60,7 +60,7 @@ void DownloadManager::addData(QString _type, QString _source, QString _destinati
     if (_type == "Download"){
         if (sftpType == "Folder"){
         // Now get all values;
-            addServerFolder(_source,_destination);
+            addServerFolder(_source,(_destination+"/"));
         }
         else {
             numRows++;
@@ -89,8 +89,10 @@ void DownloadManager::addData(QString _type, QString _source, QString _destinati
         QObject::connect(this,SIGNAL(startDownload(QString,QString)),sftp,SLOT(startDownload(QString,QString)));
         QObject::connect(this,SIGNAL(startUpload(QString,QString)),sftp,SLOT(startUpload(QString,QString)));
         QObject::connect(sftp,SIGNAL(updateProgress()),this,SLOT(receivePercentage()));
-        QObject::connect(sftp,SIGNAL(downloadComplete(int)), this,SLOT(receiveDownloadComplete()));
-
+        QObject::connect(sftp,SIGNAL(downloadComplete(int)), this,SLOT(receiveDownloadComplete(int)));
+        QObject::connect(this,SIGNAL(sendCancelClick()),sftp,SLOT(cancelDownload()),Qt::DirectConnection);
+        QObject::connect(this,SIGNAL(sendPauseClick()),sftp,SLOT(pauseDownload()), Qt::DirectConnection);
+        QObject::connect(sftp,SIGNAL(sendSpeed(int)),this,SLOT(receiveSpeed(int)));
     }
     // Start Queue
     if (!downloading){
@@ -101,14 +103,19 @@ void DownloadManager::addData(QString _type, QString _source, QString _destinati
         QString _destination = table->item(fileCounter,2)->text();
         // If download
         if (_type == "Download"){
-        //table->item(fileCounter,3)->setText("Processing");
+            table->item(fileCounter,3)->setText("Processing");
             qDebug() << "Starting Download";
             emit startDownload(_source, _destination);
             downloading = true;
+            emit setFileName(_source);
+
+            qDebug() << "num rows - filecounter" << (numRows - fileCounter);
         }
 
     }
+            emit setNumFiles(numRows - fileCounter);
 }
+
 void DownloadManager::addLocalFolder(QString path)
 {
     //qDebug() << "add folder";
@@ -197,15 +204,25 @@ void DownloadManager::receiveCredentials(std::string _host, std::string _user, s
     port = _port;
 }
 
+void DownloadManager::receiveDownloadComplete(int a){
 
-void DownloadManager::receiveDownloadComplete(){
+    if ( a = DLOAD_CANCEL) {
+        table->item(fileCounter,3)->setText("Cancelled");
+    }
+
+    percentage = 0;
+    //emit setProgress(100);
 
     // A Download just completed.
-    //table->item(fileCounter,3)->setText("Complete");
+    table->item(fileCounter,3)->setText("Complete");
     fileCounter++;
     if (fileCounter > numRows-1){
+        // Set Value in table
+
         downloading = false;
+        emit setNumFiles(0);
         return;
+
     }
     // Otherwise
     QString _type = table->item(fileCounter,0)->text();
@@ -216,8 +233,8 @@ void DownloadManager::receiveDownloadComplete(){
     if (_type == "Download"){
         emit startDownload(_source,_destination);
     }
-
-
+    emit setNumFiles(numRows - fileCounter);
+    emit setFileName(_source);
 
 
 
@@ -230,7 +247,28 @@ void DownloadManager::receivePercentage()
 
 }
 
+void DownloadManager::receiveCancelClick()
+{
+    emit setProgress(0);
+    usleep(10);
+    emit setSpeed(" ");
+    usleep(10);
+    emit sendCancelClick();
 
+
+}
+
+void DownloadManager::receivePauseClick()
+{
+    emit sendPauseClick();
+}
+
+void DownloadManager::receiveSpeed(int bytes)
+{
+    int bytesPerSecond = bytes / 5;
+    int speedInKb = bytesPerSecond / 1024;
+    emit setSpeed(QString::number(speedInKb));
+}
 
 
 

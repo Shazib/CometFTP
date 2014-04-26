@@ -9,22 +9,22 @@ class StatusArea : public QWidget
     Q_OBJECT
 public:
     explicit StatusArea(QWidget *parent = 0);
-
+    QPushButton* cancel;
+    QPushButton* pause;
 private:
     QLabel* file;
     QPushButton* numFiles;
-    QPushButton* cancel;
-    QPushButton* pause;
+
     QLabel *speed;
     QProgressBar* progress;
+
 signals:
-    void cancelPushed(bool pushed);
-    void pausePushed(bool pushed);
+
 
 public slots:
     void paintEvent(QPaintEvent* event);
     void setFileName(QString fileName);
-    void setNumFiles(QString _numFiles);
+    void setNumFiles(int _numFiles);
     void setSpeed(QString _speed);
     void setProgress(int progressValue);
 

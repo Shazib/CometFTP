@@ -23,7 +23,8 @@ SOURCES += main.cpp\
     ServerFileModel.cpp \
     AddressBar.cpp \
     DownloadManager.cpp \
-    CustomFileModel.cpp
+    CustomFileModel.cpp \
+    EncryptHelper.cpp
 
 HEADERS  += \
     MainWindow.h \
@@ -36,7 +37,8 @@ HEADERS  += \
     ServerFileModel.h \
     AddressBar.h \
     DownloadManager.h \
-    CustomFileModel.h
+    CustomFileModel.h \
+    EncryptHelper.h
 
 RESOURCES += \
     resources.qrc
@@ -53,3 +55,5 @@ win32: LIBS += -ldwmapi
 
 win32: LIBS += -lssh
 win32: LIBS += -lssh_threads
+win32: LIBS += -llibeay32
+win32: LIBS += -lssleay32

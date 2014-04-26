@@ -18,7 +18,14 @@ signals:
     void initThread(std::string host, std::string user, std::string pass, std::string port);
     void startDownload(QString source, QString destination);
     void startUpload(QString source, QString destination);
+
+    // Status Area Updating
     void setProgress(int progress);
+    void setFileName(QString fileName);
+    void setNumFiles(int numFiles);
+    void sendPauseClick();
+    void sendCancelClick();
+    void setSpeed(QString speed);
 
 private:
     std::string host, user, password, port;
@@ -35,10 +42,21 @@ private:
     int percentage;
     int fileCounter;
 
+    enum returnCodes {
+        DLOAD_FILE_EXISTS,
+        DLOAD_COMPLETE,
+        DLOAD_FAILED,
+        DLOAD_OVERWRITE,
+        DLOAD_CANCEL,
+        DLOAD_ERROR
+    };
 public slots:
     // Thread slots
     void receivePercentage();
-    void receiveDownloadComplete();
+    void receiveDownloadComplete(int a);
+    void receiveCancelClick();
+    void receivePauseClick();
+    void receiveSpeed(int bytes);
 
     void addData(QString _type, QString _source, QString _destination, QString sftpType);
     void addLocalFolder(QString path);

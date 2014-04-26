@@ -7,10 +7,8 @@
  * Some styles here are required to be inline as they change.
  */
 #include "ServerExplorer.h"
-#include "SlidingStackedWidget.h"
-#include "AddressBar.h"
+#include <openssl/aes.h>
 
-#include <QtWidgets>
 
 ServerExplorer::ServerExplorer(QWidget *parent) :
     QWidget(parent)
@@ -151,6 +149,8 @@ void ServerExplorer::setupSiteManager()
     QObject::connect(bookmarkBtn, SIGNAL(clicked()),managerSlider,SLOT(slideInNext()));
     QObject::connect(sftpBtn, SIGNAL(clicked()),managerSlider, SLOT(slideInPrev()));
     QObject::connect(connectBtn, SIGNAL(clicked()),this,SLOT(connectBtnPressed()));
+    QObject::connect(connectBookmarkBtn, SIGNAL(clicked()),this,SLOT(addBookmark()));
+
     managerSlider->setSpeed(animTime);
     managerSlider->setWrap(false);
 }
@@ -162,7 +162,8 @@ void ServerExplorer::bookmarkBtnPressed()
     bookmarkBtn->setStyleSheet("QPushButton{border-style:none; text-align:center;padding-top:2px; padding-bottom:4px; background-color:#ebebeb;}");
     sftpBtn->setStyleSheet("QPushButton{border-style:none; text-align:center; padding-top:2px;padding-bottom:4px; background-color:#cdcdcd;}");
 
-    // Switch to bookmark slide
+
+
 }
 
 void ServerExplorer::sftpBtnPressed()
@@ -181,7 +182,7 @@ void ServerExplorer::connectBtnPressed()
 
     _host = "nova.so"; //host->text().toLocal8Bit().constData();
     _user = "user"; //user->text().toLocal8Bit().constData();
-    _password = ""; //password->text().toLocal8Bit().constData();
+    _password = "O0h4n7hony="; //password->text().toLocal8Bit().constData();
     _port = "22"; //port->text().toLocal8Bit().constData();
 
     emit sendCredentials(_host, _user, _password, _port);
@@ -293,4 +294,49 @@ void ServerExplorer::receiveDropData(QString type, QString source, QString desti
     emit sendDropData(type,source,destination,sftpType);
 }
 
-//Signal to send drop data to parent
+// Bookmark data
+void ServerExplorer::addBookmark()
+{
+    QSettings settings;
+    QVariant a = settings.value("bookmarks").toInt();
+    if (a == NULL){
+        // No need to load existing
+      //  QString bookmark = host->text() + "//" + user->text() + "//" + password->text() + "//" + port->text() + "//";
+
+    }
+    QString pass = "hello";
+    //qDebug() << "Password is " << password;
+
+    //char* password = "hello";
+    //unsigned char encryptedPass;
+  //  unsigned char key = "729308A8E815F6A46EB3A8AE6D5463CA7B64A0E2E11BC26A68106FC7697E727E37011";
+    unsigned char ckey[] = "\x09\x8F\x6B\xCD\x46\x21\xD3\x73\xCA\xDE\x4E\x83\x26\x27\xB4\xF6";
+   // char* result;
+
+    const char* password = pass.toLocal8Bit().constData();
+    qDebug() << "Password: " << password;
+    unsigned char encrypted[strlen(password)];
+    unsigned char out[strlen(password)];
+    AES_KEY enc_key, dec_key;
+    AES_set_encrypt_key(ckey,128,&enc_key);
+    AES_set_decrypt_key(ckey,128,&dec_key);
+    AES_encrypt((unsigned char*) password ,encrypted, &enc_key);
+    qDebug() << "encrypted: " << (char *)encrypted;
+    AES_decrypt(encrypted, out, &dec_key);
+    qDebug() << "Decrypted: " << (char*) out;
+    //AES_ecb_encrypt((unsigned char*)password, encryptedPass, &enc_key, 1);
+
+   // QByteArray pass =  QByteArray((char*)encryptedPass);
+    //qDebug() << QString::fromLocal8Bit(pass);
+
+  //  AES_set_decrypt_key((unsigned char*)key,128,&dec_key);
+   // AES_decrypt((unsigned char*)encryptedPass,(unsigned char*)result,&dec_key);
+
+    //qDebug() << result;
+
+    //QString encryptedPass = Crypto::encrypt(password);
+    //qDebug() << "Encrypted Pass is " << encryptedPass;
+   // QString decryptedPass = Crypto::decrypt(encryptedPass);
+   // qDebug() << "Decrypted pass is " << decryptedPass;
+
+}
