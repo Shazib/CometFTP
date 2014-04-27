@@ -17,8 +17,11 @@ ServerExplorer::ServerExplorer(QWidget *parent) :
     int _min=500;
     int _max=1500;
     animTime=(_min+_max)>>1;
-
     mainDir = "/";
+
+    QCoreApplication::setOrganizationName("BCU");
+    QCoreApplication::setApplicationName("CometFTP");
+    QCoreApplication::setApplicationVersion("0.0.1");
 
     // Main Slider Setup
     mainSlider = new SlidingStackedWidget(this);
@@ -37,6 +40,11 @@ ServerExplorer::ServerExplorer(QWidget *parent) :
     mainLayout->setContentsMargins(0,0,0,0);
     this->setLayout(mainLayout);
 
+
+    // Load Bookmarks
+    QSettings settings;
+    QVariant a = settings.value("bookmarks");
+    bookmarks = settings.value("bookmark").toStringList();
 
 
 }
@@ -122,8 +130,32 @@ void ServerExplorer::setupSiteManager()
     connectLayout->setAlignment(Qt::AlignCenter);
     connectLayout->setContentsMargins(0,0,0,0);
 
-    // Setup bookmark area
+    // Setup bookmark area    
+    // Get bookmarks
 
+    QHBoxLayout* mainBookmarkLayout = new QHBoxLayout();
+    QHBoxLayout* leftBookmarkLayout = new QHBoxLayout();
+    QVBoxLayout* rightBookmarkLayout = new QVBoxLayout();
+
+    serverLbl = new QLabel();
+    userLbl = new QLabel();
+    bookmarkConnect = new QPushButton();
+    bookmarkConnect->setText("Connect");
+    bookmarkTable = new QListWidget();
+    bookmarkTable->setFixedWidth(100);
+    rightBookmarkLayout->addWidget(serverLbl);
+    rightBookmarkLayout->addWidget(userLbl);
+    rightBookmarkLayout->addWidget(bookmarkConnect);
+    leftBookmarkLayout->addWidget(bookmarkTable);
+    rightBookmarkLayout->setAlignment(Qt::AlignCenter);
+
+    setBookmarks();
+    setTableData();
+
+    mainBookmarkLayout->addLayout(leftBookmarkLayout);
+    mainBookmarkLayout->addLayout(rightBookmarkLayout);
+    bookmarkSlide->setLayout(mainBookmarkLayout);
+    QObject::connect(bookmarkTable,SIGNAL(currentRowChanged(int)),this,SLOT(updateBookmarkView(int)));
 
     // Setup slides
     connectSlide->setLayout(connectLayout);
@@ -150,6 +182,7 @@ void ServerExplorer::setupSiteManager()
     QObject::connect(sftpBtn, SIGNAL(clicked()),managerSlider, SLOT(slideInPrev()));
     QObject::connect(connectBtn, SIGNAL(clicked()),this,SLOT(connectBtnPressed()));
     QObject::connect(connectBookmarkBtn, SIGNAL(clicked()),this,SLOT(addBookmark()));
+
 
     managerSlider->setSpeed(animTime);
     managerSlider->setWrap(false);
@@ -294,49 +327,108 @@ void ServerExplorer::receiveDropData(QString type, QString source, QString desti
     emit sendDropData(type,source,destination,sftpType);
 }
 
+
 // Bookmark data
 void ServerExplorer::addBookmark()
 {
+
+    qDebug() << "add bookmark";
+    // Save bookmark
     QSettings settings;
-    QVariant a = settings.value("bookmarks").toInt();
-    if (a == NULL){
-        // No need to load existing
-      //  QString bookmark = host->text() + "//" + user->text() + "//" + password->text() + "//" + port->text() + "//";
+    QStringList values = settings.value("bookmark").toStringList();
+    values << host->text() << user->text() << encrypt(password->text()) << port->text();
+    settings.setValue("bookmark",values);
 
-    }
-    QString pass = "hello";
-    //qDebug() << "Password is " << password;
+    qDebug() << "bookmark Added to settings: " << host->text() << " " << user->text() << " " << encrypt(password->text()) << " " << port->text();
 
-    //char* password = "hello";
-    //unsigned char encryptedPass;
-  //  unsigned char key = "729308A8E815F6A46EB3A8AE6D5463CA7B64A0E2E11BC26A68106FC7697E727E37011";
+    setBookmarks();
+
+}
+
+QString ServerExplorer::encrypt(QString pass)
+{
     unsigned char ckey[] = "\x09\x8F\x6B\xCD\x46\x21\xD3\x73\xCA\xDE\x4E\x83\x26\x27\xB4\xF6";
-   // char* result;
-
     const char* password = pass.toLocal8Bit().constData();
-    qDebug() << "Password: " << password;
     unsigned char encrypted[strlen(password)];
     unsigned char out[strlen(password)];
-    AES_KEY enc_key, dec_key;
+    AES_KEY enc_key;
     AES_set_encrypt_key(ckey,128,&enc_key);
-    AES_set_decrypt_key(ckey,128,&dec_key);
+    //AES_set_decrypt_key(ckey,128,&dec_key);
     AES_encrypt((unsigned char*) password ,encrypted, &enc_key);
-    qDebug() << "encrypted: " << (char *)encrypted;
-    AES_decrypt(encrypted, out, &dec_key);
-    qDebug() << "Decrypted: " << (char*) out;
-    //AES_ecb_encrypt((unsigned char*)password, encryptedPass, &enc_key, 1);
+    //AES_decrypt(encrypted, out, &dec_key);
+    return QString::fromLocal8Bit((char*)encrypted);
+}
 
-   // QByteArray pass =  QByteArray((char*)encryptedPass);
-    //qDebug() << QString::fromLocal8Bit(pass);
+QString ServerExplorer::decrypt(QString encryptedPassword)
+{
+    unsigned char ckey[] = "\x09\x8F\x6B\xCD\x46\x21\xD3\x73\xCA\xDE\x4E\x83\x26\x27\xB4\xF6";
+   // qDebug() << "Got Key";
+    unsigned char* encryptedPass = (unsigned char*)encryptedPassword.toLocal8Bit().data();
+   // qDebug() << "Got pass";
+    unsigned char out[strlen(encryptedPassword.toLocal8Bit().data())];
+   // qDebug() << "got output variable";
+    AES_KEY dec_key;
+   // qDebug() << "got decrypt key";
+    //AES_set_encrypt_key(ckey,128,&enc_key);
+    AES_set_decrypt_key(ckey,128,&dec_key);
+  //  qDebug() << "set key";
+    //AES_encrypt((unsigned char*) password ,encrypted, &enc_key);
 
-  //  AES_set_decrypt_key((unsigned char*)key,128,&dec_key);
-   // AES_decrypt((unsigned char*)encryptedPass,(unsigned char*)result,&dec_key);
+    AES_decrypt(encryptedPass, out, &dec_key);
 
-    //qDebug() << result;
+  //  qDebug() << "Decrypted";
 
-    //QString encryptedPass = Crypto::encrypt(password);
-    //qDebug() << "Encrypted Pass is " << encryptedPass;
-   // QString decryptedPass = Crypto::decrypt(encryptedPass);
-   // qDebug() << "Decrypted pass is " << decryptedPass;
+    return "hello";//QString::fromLocal8Bit((char*)out);
+
+}
+
+void ServerExplorer::setBookmarks()
+{
+    bookmarks.clear();
+    int counter = 0;
+    QSettings settings;
+
+    foreach(QString a,settings.value("bookmark").toStringList() ){
+        counter++;
+        if (counter == 3){
+            counter = 0;
+            bookmarks << decrypt(a);
+        }
+        else {
+            bookmarks << a;
+        }
+    }
+    qDebug() << "bookmarks loaded from settings";
+    qDebug() << "count of bookmark list " << bookmarks.count();
+    setTableData();
+}
+
+void ServerExplorer::updateBookmarkView(int row)
+{
+    int a = row;
+    //Start value = a * 4;
+
+    serverLbl->setText(bookmarks.at(a*4));
+    userLbl->setText(bookmarks.at(a*4+1));
+
+}
+
+void ServerExplorer::setTableData()
+{
+    qDebug() << "Settings data in table";
+
+    int counter = 0;
+    bookmarkTable->clear();
+    foreach(QString a, bookmarks){
+        // Add to table
+        if (counter == 0){
+            bookmarkTable->addItem(a);
+        }
+        counter++;
+        if (counter == 4){
+            counter = 0;
+        }
+
+    }
 
 }

@@ -24,13 +24,16 @@ DownloadManager::DownloadManager(QWidget *parent) :
     qRegisterMetaType<std::string>("std::string");
 }
 
-void DownloadManager::addData(QString _type, QString _source, QString _destination, QString sftpType){
+void DownloadManager::addData(QString _type,
+                              QString _source,
+                              QString _destination,
+                              QString sftpType){
 
 
     // The manager must check if folders are added.
     // Add data to model
 
-    //destination = _destination;
+    destination = _destination ;
 
     // If Upload
     if (_type == "Upload")
@@ -93,6 +96,7 @@ void DownloadManager::addData(QString _type, QString _source, QString _destinati
         QObject::connect(this,SIGNAL(sendCancelClick()),sftp,SLOT(cancelDownload()),Qt::DirectConnection);
         QObject::connect(this,SIGNAL(sendPauseClick()),sftp,SLOT(pauseDownload()), Qt::DirectConnection);
         QObject::connect(sftp,SIGNAL(sendSpeed(int)),this,SLOT(receiveSpeed(int)));
+        isAlive = true;
     }
     // Start Queue
     if (!downloading){
@@ -106,6 +110,15 @@ void DownloadManager::addData(QString _type, QString _source, QString _destinati
             table->item(fileCounter,3)->setText("Processing");
             qDebug() << "Starting Download";
             emit startDownload(_source, _destination);
+            downloading = true;
+            emit setFileName(_source);
+
+            qDebug() << "num rows - filecounter" << (numRows - fileCounter);
+        }
+        if (_type == "Upload"){
+            table->item(fileCounter,3)->setText("Processing");
+            qDebug() << "Starting Upload";
+            emit startUpload(_source, _destination);
             downloading = true;
             emit setFileName(_source);
 
@@ -146,8 +159,8 @@ void DownloadManager::addLocalFolder(QString path)
         } else if (list.at(i).isDir()){
             // Recursive call
             list.at(i).fileName();
-            destinationTemp = list.at(i).fileName(); + "/";
-            destination = destination + destinationTemp + "/";
+            destinationTemp = list.at(i).fileName() + "/";
+            destination = destination + destinationTemp;// + "/";
             addLocalFolder(list.at(i).absoluteFilePath());
 
 
@@ -156,7 +169,7 @@ void DownloadManager::addLocalFolder(QString path)
     }
     // Reset Destination folder for parent
     destination.remove((destination.count()-destinationTemp.count()-1),destinationTemp.count());
-    destination.remove(destination.count()-1,1);
+    //destination.remove(destination.count()-1,1);
     destinationTemp = "";
 
 }
@@ -206,12 +219,12 @@ void DownloadManager::receiveCredentials(std::string _host, std::string _user, s
 
 void DownloadManager::receiveDownloadComplete(int a){
 
-    if ( a = DLOAD_CANCEL) {
+    if ( a == DLOAD_CANCEL) {
         table->item(fileCounter,3)->setText("Cancelled");
     }
 
     percentage = 0;
-    //emit setProgress(100);
+    emit setProgress(0);
 
     // A Download just completed.
     table->item(fileCounter,3)->setText("Complete");
@@ -232,6 +245,8 @@ void DownloadManager::receiveDownloadComplete(int a){
 
     if (_type == "Download"){
         emit startDownload(_source,_destination);
+    } else if (_type == "Upload"){
+        emit startUpload(_source,_destination);
     }
     emit setNumFiles(numRows - fileCounter);
     emit setFileName(_source);

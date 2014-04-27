@@ -14,6 +14,7 @@ class ServerExplorer : public QWidget
     Q_OBJECT
 public:
     explicit ServerExplorer(QWidget *parent = 0);
+
     std::string _host;
     std::string _user;
     std::string _port;
@@ -33,6 +34,9 @@ private slots:
     void updatedPath(QString path);
     void receiveDropData(QString type, QString source, QString destination, QString sftpType);
     void addBookmark();
+    void setBookmarks();
+    void updateBookmarkView(int row);
+    void setTableData();
 
 private:
     QFrame* toolbar;
@@ -57,6 +61,14 @@ private:
     int animTime;
     QTableView* table;
     AddressBar* addressBar;
+    // Bookmarks
+    QStringList bookmarks;
+    QString encrypt(QString pass);
+    QString decrypt(QString encryptedPassword);
+    QListWidget* bookmarkTable;
+    QLabel* serverLbl;
+    QLabel* userLbl;
+    QPushButton* bookmarkConnect;
 
 };
 

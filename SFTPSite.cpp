@@ -221,6 +221,7 @@ int SFTPSite::verify_knownhost()
     return -1;
 }
 
+// Silent verify for already verififed sites
 int SFTPSite::silent_verify_knownhost()
 {
     int state, hlen, rc;
@@ -237,6 +238,7 @@ int SFTPSite::silent_verify_knownhost()
     return 0;
 }
 
+// Silent init for background
 bool SFTPSite::silent_init()
 {
     // Connect to Site
@@ -610,6 +612,119 @@ int SFTPSite::downloadfile(QString source, QString Destination)
 
 }
 
+// Upload a file
+int SFTPSite::uploadFile(QString source, QString destination)
+{
+    qDebug() << "Source: " << source;
+    qDebug() << "dest: " << destination;
+
+    qDebug() << "Starting Upload method";
+    int res = DLOAD_OVERWRITE;
+
+    QThread* thread = new QThread(this);
+    QTimer* timer= new QTimer(0);
+    timer->setInterval(5000);
+    timer->moveToThread(thread);
+    QObject::connect(timer,SIGNAL(timeout()),this,SLOT(receiveTimer()),Qt::DirectConnection);
+    QObject::connect(thread,SIGNAL(started()),timer,SLOT(start()));
+    thread->start();
+    qDebug() << "Timer started";
+
+    // Check if file exists on server
+    int access_type = O_WRONLY | O_CREAT | O_TRUNC;
+    QStringList split = source.split("/");
+    QString fileName = split.last();
+    sftp_file file;
+    sftp_attributes attrib;
+    FILE* fp;
+    // Destination full path
+    QString serverPath = destination + fileName;
+
+    qDebug() << "got full path";
+
+    // Check if folder exists on server
+    //file = sftp_open(sftp, serverPath.toLocal8Bit().data(),access_type,0);
+
+    sftp_dir dir;
+    dir = sftp_opendir(sftp, destination.toLocal8Bit().data());
+
+    if (dir != NULL){
+        // Is a directory
+    } else {
+        // MkDir
+        int a = makeDir(destination);
+        qDebug() << "Made folder";
+        //if (a != 0) {return DLOAD_ERROR;}
+    }
+
+    qDebug() << "done with checking";
+
+    // Carry on with Upload
+    //sftp_attributes_free(attrib);
+   // sftp_close(file);
+    qDebug() << "Serverpath " << serverPath;
+    file = sftp_open(sftp, serverPath.toLocal8Bit().data(),access_type,  S_IWUSR);
+
+    if (file == NULL){
+        qDebug() << "Can't open file for writing";
+        qDebug() << ssh_get_error(my_ssh_session);
+        thread->terminate();
+        return SSH_ERROR;
+    }
+    qDebug() << "SFTP File opened";
+
+
+    fp = fopen(source.toLocal8Bit().data(),"rb");
+    fseek (fp,0,SEEK_END);
+    long size = ftell(fp);
+    int fileSize = (int)size;
+    int percent = fileSize / 100;
+    int percentCounter = 0;
+    rewind(fp);
+    int nbytes;
+    char* buffer[MAX_XFER_BUF_SIZE];
+
+    nbytes = fread(buffer,1,MAX_XFER_BUF_SIZE,fp);
+    for (;;){
+
+        totalBytes+=nbytes;
+        percentCounter = percentCounter + nbytes;
+        if (percentCounter >= percent){
+            percentCounter = 0;
+            emit updateProgress();
+            //qDebug() << this->thread();
+        }
+        if (pause){
+            usleep(100000);
+        } else {
+
+
+            sftp_write(file,buffer,nbytes);
+            nbytes = fread(buffer,1,MAX_XFER_BUF_SIZE,fp);
+
+            if (cancel){
+                sftp_unlink(sftp,serverPath.toLocal8Bit().data());
+                sftp_close(file);
+                fclose(fp);
+                thread->terminate();
+               return DLOAD_CANCEL;
+
+            }
+            if (feof(fp)){
+                break;
+            }
+
+        }
+
+    }
+
+    fclose(fp);
+    sftp_close(file);
+    thread->terminate();
+    return DLOAD_COMPLETE;
+
+}
+
 // Return list of files only
 int SFTPSite::sftp_getAllFiles(QString path, QString destination)
 {
@@ -677,14 +792,20 @@ int SFTPSite::sftp_getAllFiles(QString path, QString destination)
     return rc;
 }
 
-// Public Accessor
+// Make a directory
+int SFTPSite::makeDir(QString path)
+{
+    sftp_mkdir(sftp,path.toLocal8Bit().data(),S_IRWXU);
+}
+
+// Public Accessors
 QStringList SFTPSite::getAllFiles(QString path, QString destination)
 {
     values.clear();
     sftp_getAllFiles(path, destination);
     return values;
 }
-
+/*
 int SFTPSite::dloadFile(QString source, QString dest)
 {
     int a =  downloadfile(source,dest);
@@ -693,6 +814,15 @@ int SFTPSite::dloadFile(QString source, QString dest)
     }
 }
 
+int SFTPSite::uloadFile(QString source, QString dest)
+{
+    int a = uploadFile(source,dest);
+    if (a == DLOAD_COMPLETE || a == DLOAD_CANCEL){
+        emit downloadComplete(a);
+    }
+
+}
+*/
 // Slots for threaded download/upload handling
 void SFTPSite::startDownload(QString source, QString destination)
 {
@@ -704,6 +834,10 @@ void SFTPSite::startDownload(QString source, QString destination)
 
 void SFTPSite::startUpload(QString source, QString destination)
 {
+     int a = uploadFile(source,destination);
+     if (a == DLOAD_COMPLETE || a == DLOAD_CANCEL){
+         emit downloadComplete(a);
+     }
 
 }
 

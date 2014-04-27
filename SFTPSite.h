@@ -53,6 +53,7 @@ private:
     bool pause = false;
     QMutex mutex;
     int totalBytes;
+    int uploadFile(QString source, QString destination);
 
 
 public:
@@ -67,7 +68,9 @@ public:
     int numRows;
     int isDir(QString fileName);
     QStringList getAllFiles(QString path, QString destination);
-    int dloadFile(QString source, QString dest);
+   // int dloadFile(QString source, QString dest);
+   // int uloadFile(QString source, QString dest);
+    int makeDir(QString path);
 };
 
 #endif // COMET_SFTPSITE_H
