@@ -18,5 +18,8 @@
         <file>images/right33.svg</file>
         <file>images/square64.svg</file>
         <file>images/power26.svg</file>
+        <file>images/openssl-logo.png</file>
+        <file>images/libssh-logo.png</file>
+        <file>images/qt-logo.png</file>
     </qresource>
 </RCC>

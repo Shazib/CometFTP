@@ -26,7 +26,7 @@ MainWindow::MainWindow(QFrame *parent)
     QObject::connect(btnQuit, SIGNAL(clicked()), this, SLOT(close()));
     QObject::connect(btnMax, SIGNAL(clicked()), this, SLOT(maxSize()));
     QObject::connect(btnMin, SIGNAL(clicked()), this, SLOT(showMinimized()));
-
+    QObject::connect(btnMenu, SIGNAL(clicked()), this, SLOT(aboutClick()));
 
 
 
@@ -200,6 +200,13 @@ void MainWindow::recieveDropData(QString type, QString source, QString destinati
     // Send to downloader
     downloadManager->addData(type,source,destination,sftpType);
 
+}
+
+
+void MainWindow::aboutClick()
+{
+    About* about = new About();
+    about->show();
 }
 
 MainWindow::~MainWindow()

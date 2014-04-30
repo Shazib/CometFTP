@@ -15,6 +15,7 @@
 #include "StatusArea.h"
 #include "SlidingStackedWidget.h"
 #include "DownloadManager.h"
+#include "About.h";
 
 class MainWindow : public QFrame
 {
@@ -65,6 +66,7 @@ protected:
 
 private slots:
     void maxSize();
+    void aboutClick();
 
 public slots:
     void switchSlides();

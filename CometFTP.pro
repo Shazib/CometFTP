@@ -23,7 +23,8 @@ SOURCES += main.cpp\
     ServerFileModel.cpp \
     AddressBar.cpp \
     DownloadManager.cpp \
-    CustomFileModel.cpp
+    CustomFileModel.cpp \
+    About.cpp
 
 HEADERS  += \
     MainWindow.h \
@@ -36,7 +37,8 @@ HEADERS  += \
     ServerFileModel.h \
     AddressBar.h \
     DownloadManager.h \
-    CustomFileModel.h
+    CustomFileModel.h \
+    About.h
 
 RESOURCES += \
     resources.qrc
