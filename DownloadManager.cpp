@@ -8,6 +8,17 @@ DownloadManager::DownloadManager(QWidget *parent) :
 
     // Setup table widget
     table = new QTableWidget();
+    table->horizontalHeader()->setVisible(true);
+    table->horizontalHeader()->show();
+    table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table->setSelectionMode(QAbstractItemView::SingleSelection);
+    table->setShowGrid(false);
+    table->setAlternatingRowColors(true);
+    table->setStyle(QStyleFactory::create("Fusion"));
+    table->setObjectName("ServerTableView");
+    table->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    table->verticalHeader()->setDefaultSectionSize(18);
+
     mainLayout->addWidget(table);
     this->setLayout(mainLayout);
     numRows = 0;

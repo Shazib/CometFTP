@@ -40,20 +40,11 @@ HEADERS  += \
     CustomFileModel.h \
     About.h
 
-RESOURCES += \
-    resources.qrc
+RESOURCES += resources.qrc
 
 CONFIG += c++11
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../../../Users/Shazib/Downloads/ -ldwmapi
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../../../Users/Shazib/Downloads/ -ldwmapi
-
-INCLUDEPATH += $$PWD/../../../../../../Users/Shazib/Downloads
-DEPENDPATH += $$PWD/../../../../../../Users/Shazib/Downloads
-
-win32: LIBS += -ldwmapi
 
 win32: LIBS += -lssh
-win32: LIBS += -lssh_threads
 win32: LIBS += -llibeay32
 win32: LIBS += -lssleay32

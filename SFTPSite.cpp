@@ -12,7 +12,7 @@ SFTPSite::SFTPSite(QObject *parent, std::string _host, std::string _user, std::s
 {
 
     qDebug() << "Stfp created";
-    ssh_threads_set_callbacks(ssh_threads_get_pthread());
+    //ssh_threads_set_callbacks(ssh_threads_get_pthread());
     ssh_init();
 
     // Required variables

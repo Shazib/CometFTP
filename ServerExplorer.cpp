@@ -213,10 +213,10 @@ void ServerExplorer::connectBtnPressed()
 {
     // When connect is pressed, the login details are passed
 
-    _host = "nova.so"; //host->text().toLocal8Bit().constData();
-    _user = "user"; //user->text().toLocal8Bit().constData();
-    _password = "O0h4n7hony="; //password->text().toLocal8Bit().constData();
-    _port = "22"; //port->text().toLocal8Bit().constData();
+    _host = host->text().toLocal8Bit().constData();
+    _user = user->text().toLocal8Bit().constData();
+    _password = password->text().toLocal8Bit().constData();
+    _port = port->text().toLocal8Bit().constData();
 
     emit sendCredentials(_host, _user, _password, _port);
 
@@ -226,7 +226,7 @@ void ServerExplorer::connectBtnPressed()
         // ERROR
     } else {
         // SUCCESS
-    }
+
 
     // Setup Explorer slide
     table = new QTableView(this);
@@ -276,6 +276,7 @@ void ServerExplorer::connectBtnPressed()
     // Connect Table Click event
     QObject::connect(table,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(rowSelected(QModelIndex)));
     QObject::connect(model,SIGNAL(sendDropData(QString,QString,QString,QString)),this,SLOT(receiveDropData(QString,QString,QString,QString)));
+    }
 
 }
 
@@ -331,7 +332,8 @@ void ServerExplorer::receiveDropData(QString type, QString source, QString desti
 // Bookmark data
 void ServerExplorer::addBookmark()
 {
-
+    QString temp = host->text();
+    if (!temp.isEmpty()) {
     qDebug() << "add bookmark";
     // Save bookmark
     QSettings settings;
@@ -342,6 +344,7 @@ void ServerExplorer::addBookmark()
     qDebug() << "bookmark Added to settings: " << host->text() << " " << user->text() << " " << encrypt(password->text()) << " " << port->text();
 
     setBookmarks();
+}
 
 }
 
