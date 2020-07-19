@@ -6,8 +6,8 @@
 #include <QtWidgets>
 
 // Libraries
-#include <libssh/libssh.h>
-#include <libssh/sftp.h>
+//#include <libssh/libssh.h>
+//#include <libssh/sftp.h>
 
 // Classes
 #include "ServerExplorer.h"
@@ -57,7 +57,7 @@ private:
     std::string password;
     std::string user;
     std::string port;
-    sftp_session sftp;
+    //sftp_session sftp;
     void connectSftp();
 
 protected:

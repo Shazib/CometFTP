@@ -11,3 +11,15 @@
 * Address Edit send path to server explorer
 * qdrag selects file full path
 * downloads
+
+
+* interface the remote server access so we can support different services
+* use windows to store the saved PWs so we can remove openssl
+* tidy up mem management
+* file explorer column sizing
+* remove libssh and use QSSh or something else
+* fix naming conventions
+* add support for B3, S3, Dropbox(?)
+* review architecture .... Just rewrite the whole thing??
+* cancel button sizing is wrong
+* resizing doesn't remember last window position, needs to follow default windows behaviour

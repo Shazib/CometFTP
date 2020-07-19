@@ -276,9 +276,9 @@ void DownloadManager::receivePercentage()
 void DownloadManager::receiveCancelClick()
 {
     emit setProgress(0);
-    usleep(10);
+    //usleep(10);
     emit setSpeed(" ");
-    usleep(10);
+   // usleep(10);
     emit sendCancelClick();
 
 

@@ -7,7 +7,7 @@
  * Some styles here are required to be inline as they change.
  */
 #include "ServerExplorer.h"
-#include <openssl/aes.h>
+//#include <openssl/aes.h>
 
 
 ServerExplorer::ServerExplorer(QWidget *parent) :
@@ -354,10 +354,10 @@ QString ServerExplorer::encrypt(QString pass)
     const char* password = pass.toLocal8Bit().constData();
     unsigned char encrypted[strlen(password)];
     unsigned char out[strlen(password)];
-    AES_KEY enc_key;
-    AES_set_encrypt_key(ckey,128,&enc_key);
+    //AES_KEY enc_key;
+    //AES_set_encrypt_key(ckey,128,&enc_key);
     //AES_set_decrypt_key(ckey,128,&dec_key);
-    AES_encrypt((unsigned char*) password ,encrypted, &enc_key);
+   // AES_encrypt((unsigned char*) password ,encrypted, &enc_key);
     //AES_decrypt(encrypted, out, &dec_key);
     return QString::fromLocal8Bit((char*)encrypted);
 }
@@ -370,14 +370,14 @@ QString ServerExplorer::decrypt(QString encryptedPassword)
    // qDebug() << "Got pass";
     unsigned char out[strlen(encryptedPassword.toLocal8Bit().data())];
    // qDebug() << "got output variable";
-    AES_KEY dec_key;
+    //AES_KEY dec_key;
    // qDebug() << "got decrypt key";
     //AES_set_encrypt_key(ckey,128,&enc_key);
-    AES_set_decrypt_key(ckey,128,&dec_key);
+  //  AES_set_decrypt_key(ckey,128,&dec_key);
   //  qDebug() << "set key";
     //AES_encrypt((unsigned char*) password ,encrypted, &enc_key);
 
-    AES_decrypt(encryptedPass, out, &dec_key);
+  //  AES_decrypt(encryptedPass, out, &dec_key);
 
   //  qDebug() << "Decrypted";
 

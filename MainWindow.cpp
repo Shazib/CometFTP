@@ -5,6 +5,8 @@
 
 #include "MainWindow.h"
 
+#include <QFrame>
+
 
 MainWindow::MainWindow(QFrame *parent)
     : QFrame(parent)
@@ -12,7 +14,15 @@ MainWindow::MainWindow(QFrame *parent)
     // Initial Setup
     max = false;
     switched = false;
-    this->resize(900,500);
+
+   // this->setGeometry( 0, 0, 900,500);
+
+    //QFrame::frameShape();
+
+    auto shape = QFrame::frameShape();
+
+    //QWidget::setGeometry( 1, 1, 1,1 );
+
     move(QApplication::desktop()->availableGeometry(this).center() - rect().center());
     int _min=500;
     int _max=1500;
@@ -37,7 +47,7 @@ void MainWindow::createGuiComponents()
 {
 
     // Taskbar Buttons
-    btnQuit = new QPushButton("",this);
+    btnQuit = new QPushButton( QString(""),(QWidget*)this);
     btnMin = new QPushButton("", this);
     btnMax = new QPushButton("",this);
     btnMenu = new QPushButton("", this);

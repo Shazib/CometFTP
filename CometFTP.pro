@@ -45,6 +45,6 @@ RESOURCES += resources.qrc
 CONFIG += c++11
 
 
-win32: LIBS += -lssh
-win32: LIBS += -llibeay32
-win32: LIBS += -lssleay32
+#win32: LIBS += -lssh
+#win32: LIBS += -llibeay32
+#win32: LIBS += -lssleay32
